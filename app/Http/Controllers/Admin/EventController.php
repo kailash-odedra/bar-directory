@@ -3,9 +3,11 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
 use App\Models\Event;
 use App\Models\Bar;
+use Illuminate\Http\Request;
+use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Storage;
 
 class EventController extends Controller
 {
@@ -13,17 +15,32 @@ class EventController extends Controller
     {
         $q = $request->get('q');
         $events = Event::with('bar')
-            ->when($q, fn($b) => $b->where('title','like', "%{$q}%"))
-            ->orderBy('start_date','desc')
-            ->paginate(25)->withQueryString();
+            ->when($q, fn($query) => $query->where('title', 'like', "%{$q}%"))
+            ->orderBy('start_time', 'desc')
+            ->paginate(20)
+            ->withQueryString();
 
-        return view('admin.events.index', compact('events'))->with('catName','bar');
+        return view('admin.events.index', [
+            'events' => $events,
+            'title' => 'Events List',
+            'catName' => 'bar',
+            'subCatName' => 'events',
+            'scrollspy' => false,
+            'simplePage' => false,
+        ]);
     }
 
     public function create()
     {
         $bars = Bar::orderBy('name')->get();
-        return view('admin.events.create', compact('bars'))->with('catName','bar');
+        return view('admin.events.create', [
+            'bars' => $bars,
+            'title' => 'Add New Event',
+            'catName' => 'bar',
+            'subCatName' => 'events',
+            'scrollspy' => false,
+            'simplePage' => false,
+        ]);
     }
 
     public function store(Request $request)
@@ -32,20 +49,33 @@ class EventController extends Controller
             'bar_id' => 'required|exists:bars,id',
             'title' => 'required|string|max:191',
             'description' => 'nullable|string',
-            'start_date' => 'required|date',
-            'end_date' => 'nullable|date|after_or_equal:start_date',
-            'ticket_url' => 'nullable|url',
+            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
+            'start_time' => 'required|date',
+            'end_time' => 'nullable|date|after_or_equal:start_time',
+            'ticket_link' => 'nullable|url',
         ]);
+
+        if ($request->hasFile('image')) {
+            $data['image'] = $request->file('image')->store('events', 'public');
+        }
 
         Event::create($data);
 
-        return redirect(url('admin/events'))->with('success','Event created.');
+        return redirect()->route('admin.events.index')->with('success', 'Event created successfully.');
     }
 
     public function edit(Event $event)
     {
         $bars = Bar::orderBy('name')->get();
-        return view('admin.events.edit', compact('event','bars'))->with('catName','bar');
+        return view('admin.events.create', [ // reuse create view
+            'event' => $event,
+            'bars' => $bars,
+            'title' => 'Edit Event',
+            'catName' => 'bar',
+            'subCatName' => 'events',
+            'scrollspy' => false,
+            'simplePage' => false,
+        ]);
     }
 
     public function update(Request $request, Event $event)
@@ -54,19 +84,32 @@ class EventController extends Controller
             'bar_id' => 'required|exists:bars,id',
             'title' => 'required|string|max:191',
             'description' => 'nullable|string',
-            'start_date' => 'required|date',
-            'end_date' => 'nullable|date|after_or_equal:start_date',
-            'ticket_url' => 'nullable|url',
+            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
+            'start_time' => 'required|date',
+            'end_time' => 'nullable|date|after_or_equal:start_time',
+            'ticket_link' => 'nullable|url',
         ]);
+
+        if ($request->hasFile('image')) {
+            if ($event->image) {
+                Storage::disk('public')->delete($event->image);
+            }
+            $data['image'] = $request->file('image')->store('events', 'public');
+        }
 
         $event->update($data);
 
-        return redirect(url('admin/events'))->with('success','Event updated.');
+        return redirect()->route('admin.events.index')->with('success', 'Event updated successfully.');
     }
 
     public function destroy(Event $event)
     {
+        if ($event->image) {
+            Storage::disk('public')->delete($event->image);
+        }
+
         $event->delete();
-        return redirect(url('admin/events'))->with('success','Event deleted.');
+        return back()->with('success', 'Event deleted successfully.');
     }
 }
+

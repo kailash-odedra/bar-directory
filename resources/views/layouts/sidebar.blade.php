@@ -70,9 +70,11 @@
                     <li class="{{ Request::is('admin/bar') ? 'active' : '' }}">
                         <a href="{{ url('admin/bar') }}">All Bars</a>
                     </li>
-
-                    <li class="{{ Request::is('admin/bar/create') ? 'active' : '' }}">
-                        <a href="{{ url('admin/bar/create') }}">Add New Bar</a>
+                    <li class="{{ Request::is('admin/bar-tags*') ? 'active' : '' }}">
+                        <a href="{{ url('admin/bar-tags') }}">Tags / Categories</a>
+                    </li>
+                    <li class="{{ Request::is('admin/events*') ? 'active' : '' }}">
+                        <a href="{{ url('admin/events') }}">Events</a>
                     </li>
                 </ul>
             </li>

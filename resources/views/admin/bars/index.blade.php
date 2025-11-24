@@ -17,7 +17,11 @@
 
     <div class="col-xl-12 col-lg-12 col-sm-12  layout-spacing">
         <div class="statbox widget box box-shadow">
-            <div class="widget-content widget-content-area">
+            <div class="widget-content widget-content-area mt-3">
+                <div class="d-flex justify-content-between align-items-center mt-3">
+                    <h5 class="mb-0">Bars List</h5>
+                    <a href="{{ route('admin.bar.create') }}" class="btn btn-primary">Add New Bar</a>
+                </div>
                 <table id="html5-extension" class="table dt-table-hover" style="width:100%">
                     <thead>
                         <tr>

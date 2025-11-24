@@ -23,7 +23,7 @@ class BarController extends Controller
         return view('admin.bars.index', [
             'bars' => $bars,
             'title' => 'Bars List',
-            'catName' => 'All Bars',
+            'catName' => 'bar',
             'scrollspy' => false,
             'simplePage' => false,
         ]);
@@ -40,7 +40,7 @@ class BarController extends Controller
             'states' => $states,
             'tags' => $tags,
             'title' => 'Create Bar',
-            'catName' => 'Add New Bar',
+            'catName' => 'bar',
             'scrollspy' => false,
             'simplePage' => false,
         ]);
@@ -56,113 +56,90 @@ class BarController extends Controller
 
         $data['slug'] = $data['slug'] ?: Str::slug($request->name.'-'.uniqid());
 
-        // ================= LOGO ====================
         if ($request->hasFile('logo')) {
             $data['logo'] = $this->storeImage($request->file('logo'), 'bars/logo');
         }
 
-        // ================= COVER ===================
         if ($request->hasFile('cover_image')) {
             $data['cover_image'] = $this->storeImage($request->file('cover_image'), 'bars/cover');
         }
-
-        // CREATE BAR
         $bar = Bar::create($data);
-
-        // ================= TAGS ===================
         if ($request->filled('tags')) {
             $bar->tags()->sync($request->tags);
         }
 
-        // ================= LOCATION ===============
+        if ($request->hasFile('gallery')) {
+            foreach ($request->file('gallery') as $image) {
+                $path = $this->storeImage($image, 'bars/gallery');
+                $bar->images()->create([
+                    'bar_id' => $bar->id,
+                    'path'   => $path,
+                ]);
+            }
+        }
+        $this->saveTimings($bar, $request->timing ?? []);
+        return redirect()->route('admin.bar.index')->with('success', 'Bar created successfully');
+    }
+
+    public function edit($id)
+    {
+        $bar = Bar::with(['location','tags','timings','images'])->findOrFail($id);
+        $countries = Country::all();
+        $states = State::all();
+        $tags = BarTag::all();
+        return view('admin.bars.create', [
+            'bar' => $bar,
+            'countries' => $countries,
+            'states' => $states,
+            'tags' => $tags,
+            'title' => 'Edit Bar',
+            'catName' => 'bar',
+            'scrollspy' => false,
+            'simplePage' => false,
+        ]);
+    }
+
+    public function update(Request $request, Bar $bar)
+    {
+        $data = $request->only([
+            'name','slug','short_description','full_description','video_url',
+            'meta_title','meta_description','meta_keywords',
+            'facebook','instagram','tiktok','youtube','website'
+        ]);
+
+        if ($request->hasFile('logo')) {
+            if ($bar->logo) Storage::disk('public')->delete($bar->logo);
+            $data['logo'] = $this->storeImage($request->file('logo'), 'bars/logo');
+        }
+
+        if ($request->hasFile('cover_image')) {
+            if ($bar->cover_image) Storage::disk('public')->delete($bar->cover_image);
+            $data['cover_image'] = $this->storeImage($request->file('cover_image'), 'bars/cover');
+        }
+
+        $bar->update($data);
+        if ($request->has('tags')) {
+            $bar->tags()->sync($request->tags);
+        }
+
         $this->saveLocation($bar, $request);
 
-        // =============== GALLERY IMAGES ===========
-                if ($request->hasFile('gallery')) {
-                    foreach ($request->file('gallery') as $image) {
-                        $path = $this->storeImage($image, 'bars/gallery');
-                        $bar->images()->create([
-                            'bar_id' => $bar->id,
-                            'path'   => $path,
-                        ]);
-                    }
-                }
-
-
-                // =============== TIMINGS ==================
-                $this->saveTimings($bar, $request->timing ?? []);
-
-                return redirect()->route('admin.bar.index')->with('success', 'Bar created successfully');
-            }
-
-            public function edit($id)
-            {
-                $bar = Bar::with(['location','tags','timings','images'])->findOrFail($id);
-                $countries = Country::all();
-                $states = State::all();
-                $tags = BarTag::all();
-                return view('admin.bars.create', [
-                    'bar' => $bar,
-                    'countries' => $countries,
-                    'states' => $states,
-                    'tags' => $tags,
-                    'title' => 'Edit Bar',
-                    'catName' => 'Edit Bar Details',
-                    'scrollspy' => false,
-                    'simplePage' => false,
+        if ($request->hasFile('gallery')) {
+            foreach ($request->file('gallery') as $image) {
+                $path = $this->storeImage($image, 'bars/gallery');
+                $bar->images()->create([
+                    'bar_id' => $bar->id,
+                    'path'   => $path,
                 ]);
             }
+        }
 
-            public function update(Request $request, Bar $bar)
-            {
-                $data = $request->only([
-                    'name','slug','short_description','full_description','video_url',
-                    'meta_title','meta_description','meta_keywords',
-                    'facebook','instagram','tiktok','youtube','website'
-                ]);
-
-                // REPLACE LOGO
-                if ($request->hasFile('logo')) {
-                    if ($bar->logo) Storage::disk('public')->delete($bar->logo);
-                    $data['logo'] = $this->storeImage($request->file('logo'), 'bars/logo');
-                }
-
-                // REPLACE COVER
-                if ($request->hasFile('cover_image')) {
-                    if ($bar->cover_image) Storage::disk('public')->delete($bar->cover_image);
-                    $data['cover_image'] = $this->storeImage($request->file('cover_image'), 'bars/cover');
-                }
-
-                $bar->update($data);
-
-                // UPDATE TAGS
-                if ($request->has('tags')) {
-                    $bar->tags()->sync($request->tags);
-                }
-
-                // UPDATE LOCATION
-                $this->saveLocation($bar, $request);
-
-                // ADD NEW GALLERY IMAGES
-                if ($request->hasFile('gallery')) {
-                    foreach ($request->file('gallery') as $image) {
-                        $path = $this->storeImage($image, 'bars/gallery');
-                        $bar->images()->create([
-                            'bar_id' => $bar->id,
-                            'path'   => $path,
-                        ]);
-                    }
-                }
-
-
-        // UPDATE TIMINGS
         $bar->timings()->delete();
         $this->saveTimings($bar, $request->timing ?? []);
 
         return redirect()->route('admin.bar.index')->with('success', 'Bar updated successfully');
     }
 
-    // ====================== DELETE ======================
     public function destroy(Bar $bar)
     {
         if ($bar->logo) Storage::disk('public')->delete($bar->logo);
@@ -202,12 +179,10 @@ class BarController extends Controller
                 'weekday'    => $weekday,
                 'open_time'  => $row['open_time'] ?? null,
                 'close_time' => $row['close_time'] ?? null,
-                'is_closed'  => isset($row['is_closed']), // checkbox returns 'on' if checked
+                'is_closed'  => isset($row['is_closed']), 
             ]);
         }
     }
-
-
     protected function storeImage($file, $folder)
     {
         $path = $file->storePublicly($folder, 'public');

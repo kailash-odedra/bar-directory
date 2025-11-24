@@ -33,6 +33,7 @@ Route::prefix('admin')->as('admin.')->group(function () {
         ->name('location.states');
 
     Route::resource('bar-tags', BarTagController::class);
+    Route::resource('events', EventController::class);
     Route::resource('bar-menu-categories', BarMenuCategoryController::class);
     Route::resource('bar-menu-items', BarMenuItemController::class);
     Route::resource('bar-images', BarImageController::class);
