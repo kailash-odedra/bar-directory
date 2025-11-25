@@ -13,6 +13,7 @@ return new class extends Migration
     {
         Schema::create('bar_menu_items', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('bar_id')->constrained('bars')->cascadeOnDelete();
             $table->foreignId('bar_menu_category_id')->constrained('bar_menu_categories')->cascadeOnDelete();
             $table->string('name');
             $table->decimal('price', 8,2);

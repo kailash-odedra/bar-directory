@@ -3,9 +3,9 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
 use App\Models\Claim;
 use App\Models\Bar;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 
 class ClaimController extends Controller
@@ -13,42 +13,53 @@ class ClaimController extends Controller
     public function index(Request $request)
     {
         $q = $request->get('q');
-        $status = $request->get('status');
 
         $claims = Claim::with(['bar','user'])
-            ->when($q, fn($b) => $b->where('email','like', "%{$q}%"))
-            ->when($status, fn($b) => $b->where('status', $status))
-            ->orderBy('created_at','desc')
-            ->paginate(25)->withQueryString();
+            ->when($q, fn($query) =>
+                $query->whereHas('bar', fn($q2) =>
+                    $q2->where('name', 'like', "%{$q}%")
+                )
+            )
+            ->orderBy('id', 'desc')
+            ->paginate(20)
+            ->withQueryString();
 
-        return view('admin.claims.index', compact('claims'))->with('catName','bar');
+        return view('admin.claims.index', [
+            'claims' => $claims,
+            'title' => 'Claims List',
+            'catName' => 'bar',
+            'subCatName' => 'claims',
+            'scrollspy' => false,
+            'simplePage' => false,
+        ]);
     }
 
     public function show(Claim $claim)
     {
-        return view('admin.claims.show', compact('claim'))->with('catName','bar');
-    }
-
-    public function edit(Claim $claim)
-    {
-        return view('admin.claims.edit', compact('claim'))->with('catName','bar');
-    }
-
-    public function update(Request $request, Claim $claim)
-    {
-        $data = $request->validate([
-            'status' => 'required|in:pending,approved,rejected',
-            'notes' => 'nullable|string',
+        return view('admin.claims.show', [
+            'claim' => $claim,
+            'title' => 'View Claim',
+            'catName' => 'bar',
+            'subCatName' => 'claims',
         ]);
+    }
 
-        $claim->update($data);
+    public function approve($id)
+    {
+        $claim = Claim::findOrFail($id);
+        $claim->status = 'approved';
+        $claim->save();
 
-        // if approved: mark bar claimed and set claimed_by
-        if ($data['status'] === 'approved') {
-            $claim->bar->update(['claimed' => true, 'claimed_by' => $claim->user_id, 'verified' => true]);
-        }
+        return response()->json(['success' => true, 'status' => 'approved']);
+    }
 
-        return redirect(url('admin/claims'))->with('success','Claim updated.');
+    public function reject($id)
+    {
+        $claim = Claim::findOrFail($id);
+        $claim->status = 'rejected';
+        $claim->save();
+
+        return response()->json(['success' => true, 'status' => 'rejected']);
     }
 
     public function destroy(Claim $claim)
@@ -56,7 +67,8 @@ class ClaimController extends Controller
         if ($claim->verify_document) {
             Storage::disk('public')->delete($claim->verify_document);
         }
+
         $claim->delete();
-        return redirect(url('admin/claims'))->with('success','Claim removed.');
+        return back()->with('success', 'Claim deleted successfully.');
     }
 }

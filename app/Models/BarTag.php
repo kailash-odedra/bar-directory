@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 class BarTag extends Model
 {
     protected $table = 'tags';
-    protected $fillable = ['name', 'slug'];
+    protected $fillable = ['name', 'slug','status'];
 
     public function bars()
     {
@@ -17,5 +17,8 @@ class BarTag extends Model
             'tag_id',    // this model's key in pivot
             'bar_id'     // related model key in pivot
         );
+    }
+    public function isActive() {
+        return $this->status == 1;
     }
 }

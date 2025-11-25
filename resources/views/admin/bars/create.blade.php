@@ -20,7 +20,7 @@
 
             <form class="row g-3" action="{{ isset($bar) ? route('admin.bar.update', $bar->id) : route('admin.bar.store') }}" method="POST" enctype="multipart/form-data">
                 @csrf
-                @if(isset($event)) @method('PUT') @endif
+                @if(isset($bar)) @method('PUT') @endif
 
                 {{-- Bar Name --}}
                 <div class="col-md-6">
@@ -101,6 +101,17 @@
                     <input type="text" class="form-control" name="zip"
                         value="{{ old('zip', $bar->location->zipcode ?? '') }}">
                 </div>
+                <div class="col-md-4">
+                    <label class="form-label">Latitude</label>
+                    <input type="text" name="latitude" class="form-control"
+                        value="{{ old('latitude', $bar->location->latitude ?? '') }}">
+                </div>
+
+                <div class="col-md-4">
+                    <label class="form-label">Longitude</label>
+                    <input type="text" name="longitude" class="form-control"
+                        value="{{ old('longitude', $bar->location->longitude ?? '') }}">
+                </div>
 
                 {{-- Phone --}}
                 <div class="col-md-4">
@@ -130,6 +141,7 @@
 
                 </div>
                 {{-- Logo --}}
+                
                 <div class="col-md-6">
                     <label class="form-label">Logo</label>
                     <input type="file" class="form-control" name="logo">
@@ -158,6 +170,45 @@
                         @endforeach
                     </div>
                 @endif
+                <h5 class="mt-4">Social Media Links</h5>
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label">Facebook</label>
+                        <input type="text" name="facebook" class="form-control"
+                            value="{{ old('facebook', $bar->facebook ?? '') }}">
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label">Instagram</label>
+                        <input type="text" name="instagram" class="form-control"
+                            value="{{ old('instagram', $bar->instagram ?? '') }}">
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label">TikTok</label>
+                        <input type="text" name="tiktok" class="form-control"
+                            value="{{ old('tiktok', $bar->tiktok ?? '') }}">
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label">YouTube</label>
+                        <input type="text" name="youtube" class="form-control"
+                            value="{{ old('youtube', $bar->youtube ?? '') }}">
+                    </div>
+
+                </div>
+                <h4 class="mt-4">SEO Settings</h4>
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label>Meta Title</label>
+                        <input type="text" name="meta_title" class="form-control" value="{{ old('meta_title', $bar->meta_title ?? '') }}">
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label>Meta Keywords</label>
+                        <textarea name="meta_keywords" class="form-control" rows="1">{{ old('meta_keywords', $bar->meta_keywords ?? '') }}</textarea>
+                    </div>
+                    <div class="col-md-12 mb-3">
+                        <label>Meta Description</label>
+                        <textarea name="meta_description" class="form-control" rows="3">{{ old('meta_description', $bar->meta_description ?? '') }}</textarea>
+                    </div>
+                </div>
                 {{-- Weekly Timings --}}
                 <div class="col-12 mt-4">
                     <h5>Weekly Timings</h5>

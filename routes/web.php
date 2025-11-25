@@ -10,7 +10,7 @@ use App\Http\Controllers\Admin\BarReviewController;
 use App\Http\Controllers\Admin\ClaimController;
 use App\Http\Controllers\Admin\EventController;
 use App\Http\Controllers\Admin\LocationController;
-
+use App\Http\Controllers\Admin\BookingController;
 
 /**
  * =======================
@@ -29,15 +29,28 @@ Route::get('/', function () {
 Route::prefix('admin')->as('admin.')->group(function () {
 
     Route::resource('bar', BarController::class);
+    Route::post('bar/{id}/toggle-status', [BarController::class, 'toggleStatus'])->name('bar.toggleStatus');
+    Route::get('bar/{id}/approve', [BarController::class, 'approve'])->name('bar.approve');
     Route::get('get-states/{country}', [LocationController::class, 'states'])
         ->name('location.states');
-
+    Route::resource('claims', ClaimController::class)->only(['index','show','destroy']);
+    Route::post('claims/{id}/approve', [ClaimController::class,'approve'])->name('claims.approve');
+    Route::post('claims/{id}/reject', [ClaimController::class,'reject'])->name('claims.reject');
     Route::resource('bar-tags', BarTagController::class);
+    Route::post('bar-tags/{id}/toggle-status', [BarTagController::class, 'toggleStatus'])->name('bar-tags.toggleStatus');
     Route::resource('events', EventController::class);
+    Route::post('events/{id}/toggle-status', [EventController::class, 'toggleStatus'])->name('events.toggleStatus');
     Route::resource('bar-menu-categories', BarMenuCategoryController::class);
+    Route::post('bar-menu-categories/{id}/toggle-status', [BarMenuCategoryController::class, 'toggleStatus'])->name('bar-menu-categories.toggleStatus');
     Route::resource('bar-menu-items', BarMenuItemController::class);
+    Route::post('bar-menu-items/{id}/toggle-status', [BarMenuItemController::class, 'toggleStatus'])->name('bar-menu-categories.toggleStatus');
     Route::resource('bar-images', BarImageController::class);
     Route::resource('bar-reviews', BarReviewController::class);
+    Route::post('bar-reviews/{id}/approve', [BarReviewController::class, 'approve']);
+    Route::post('bar-reviews/{id}/hide', [BarReviewController::class, 'hide']);
+    Route::resource('bookings', BookingController::class);
+    Route::post('bookings/{id}/toggle-status', [BookingController::class,'toggleStatus'])
+    ->name('admin.bookings.toggleStatus');
 });
 
 

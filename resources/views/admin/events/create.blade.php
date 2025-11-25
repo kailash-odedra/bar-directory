@@ -18,16 +18,21 @@
             </div>
             @endif
 
-            <form action="{{ isset($event) ? route('admin.events.update', $event->id) : route('admin.events.store') }}" method="POST" enctype="multipart/form-data">
+            <form class="row g-3" action="{{ isset($event) ? route('admin.events.update', $event->id) : route('admin.events.store') }}" method="POST" enctype="multipart/form-data">
                 @csrf
                 @if(isset($event)) @method('PUT') @endif
-
-                <div class="mb-3">
+                <div class="col-md-6">
+                    <label class="form-label">Type</label>
+                    <select class="form-select" name="type" required>
+                        <option value="event" {{ (old('type', $event->type ?? '') == 'event') ? 'selected' : '' }}>Event</option>
+                        <option value="offer" {{ (old('type', $event->type ?? '') == 'offer') ? 'selected' : '' }}>Offer</option>
+                    </select>
+                </div>
+                <div class="col-md-6">
                     <label class="form-label">Title</label>
                     <input type="text" class="form-control" name="title" value="{{ old('title', $event->title ?? '') }}" required>
                 </div>
-
-                <div class="mb-3">
+                <div class="col-md-6">
                     <label class="form-label">Bar</label>
                     <select class="form-select" name="bar_id" required>
                         <option value="">Select Bar</option>
@@ -38,36 +43,33 @@
                         @endforeach
                     </select>
                 </div>
-
-                <div class="mb-3">
-                    <label class="form-label">Description</label>
-                    <textarea class="form-control" name="description">{{ old('description', $event->description ?? '') }}</textarea>
+                <div class="col-md-6">
+                    <label class="form-label">Ticket URL</label>
+                    <input type="url" class="form-control" name="ticket_link" value="{{ old('ticket_link', $event->ticket_link ?? '') }}">
                 </div>
-
-                <div class="mb-3">
+                <div class="col-md-6">
+                    <label class="form-label">Start Date & Time</label>
+                    <input type="datetime-local" class="form-control" name="start_time" value="{{ isset($event) ? date('Y-m-d\TH:i', strtotime($event->start_time)) : '' }}" required>
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label">End Date & Time</label>
+                    <input type="datetime-local" class="form-control" name="end_time" value="{{ isset($event) ? date('Y-m-d\TH:i', strtotime($event->end_time)) : '' }}">
+                </div>
+                <div class="col-md-6">
                     <label class="form-label">Image</label>
                     <input type="file" class="form-control" name="image">
                     @if(isset($event) && $event->image)
                     <img src="{{ asset('storage/'.$event->image) }}" width="100" class="mt-2">
                     @endif
                 </div>
-
-                <div class="mb-3">
-                    <label class="form-label">Ticket URL</label>
-                    <input type="url" class="form-control" name="ticket_link" value="{{ old('ticket_link', $event->ticket_link ?? '') }}">
+                <div class="col-md-12">
+                    <label class="form-label">Description</label>
+                    <textarea class="form-control" name="description">{{ old('description', $event->description ?? '') }}</textarea>
                 </div>
-
-                <div class="mb-3">
-                    <label class="form-label">Start Date & Time</label>
-                    <input type="datetime-local" class="form-control" name="start_time" value="{{ isset($event) ? date('Y-m-d\TH:i', strtotime($event->start_time)) : '' }}" required>
+                
+                <div class="col-12 mt-3">
+                    <button type="submit" class="btn btn-primary">{{ isset($event) ? 'Update' : 'Create' }}</button>
                 </div>
-
-                <div class="mb-3">
-                    <label class="form-label">End Date & Time</label>
-                    <input type="datetime-local" class="form-control" name="end_time" value="{{ isset($event) ? date('Y-m-d\TH:i', strtotime($event->end_time)) : '' }}">
-                </div>
-
-                <button type="submit" class="btn btn-primary">{{ isset($event) ? 'Update' : 'Create' }}</button>
             </form>
         </div>
     </div>

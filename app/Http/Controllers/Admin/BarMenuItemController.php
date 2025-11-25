@@ -3,99 +3,142 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
 use App\Models\BarMenuItem;
+use App\Models\Bar;
 use App\Models\BarMenuCategory;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
-use Intervention\Image\Facades\Image;
 
 class BarMenuItemController extends Controller
 {
     public function index(Request $request)
     {
         $q = $request->get('q');
-        $items = BarMenuItem::with('category.bar')
-            ->when($q, fn($b) => $b->where('name','like', "%{$q}%"))
-            ->orderBy('name')
-            ->paginate(20)->withQueryString();
 
-        return view('admin.menu_items.index', compact('items'))->with('catName','menu');
+        $items = BarMenuItem::with(['bar', 'category'])
+            ->when($q, fn($query) =>
+                $query->where('name', 'like', "%{$q}%")
+            )
+            ->orderBy('name')
+            ->paginate(20)
+            ->withQueryString();
+
+        return view('admin.bar-menu-items.index', [
+            'items' => $items,
+            'title' => 'Menu Items List',
+            'catName' => 'bar',
+            'subCatName' => 'bar-menu-items',
+            'scrollspy' => false,
+            'simplePage' => false,
+        ]);
     }
 
     public function create()
     {
-        $categories = BarMenuCategory::with('bar')->orderBy('name')->get();
-        return view('admin.menu_items.create', compact('categories'))->with('catName','menu');
+        $bars = Bar::orderBy('name')->get();
+        $categories = BarMenuCategory::orderBy('name')->get();
+
+        return view('admin.bar-menu-items.create', [
+            'bars' => $bars,
+            'categories' => $categories,
+            'title' => 'Add Menu Item',
+            'catName' => 'bar',
+            'subCatName' => 'bar-menu-items',
+            'scrollspy' => false,
+            'simplePage' => false,
+        ]);
     }
 
     public function store(Request $request)
     {
         $data = $request->validate([
+            'bar_id' => 'required|exists:bars,id',
             'bar_menu_category_id' => 'required|exists:bar_menu_categories,id',
-            'name' => 'required|string|max:191',
-            'price' => 'nullable|numeric',
+            'name' => 'required|string|max:150|unique:bar_menu_items,name',
+            'price' => 'required|numeric|min:0',
             'description' => 'nullable|string',
-            'image' => 'nullable|image|max:4096',
+            'image' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048',
+            'status' => 'nullable|in:0,1',
         ]);
 
+        // Upload image if provided
         if ($request->hasFile('image')) {
-            $file = $request->file('image');
-            $path = $file->storePublicly('bars/menu-items', 'public');
-
-            // optional resize with intervention
-            if (class_exists(Image::class)) {
-                $full = storage_path('app/public/'.$path);
-                Image::make($full)->fit(800,600,function($c){ $c->upsize(); })->save();
-            }
-
-            $data['image'] = $path;
+            $data['image'] = $request->file('image')->store('menu-items', 'public');
         }
+
+        // default status if not provided
+        $data['status'] = $data['status'] ?? 1;
 
         BarMenuItem::create($data);
 
-        return redirect(url('admin/bar-menu-items'))->with('success','Menu item created.');
+        return redirect()->route('admin.bar-menu-items.index')
+            ->with('success', 'Menu Item created successfully.');
     }
 
-    public function edit(BarMenuItem $barMenuItem)
+    public function edit(BarMenuItem $bar_menu_item)
     {
-        $categories = BarMenuCategory::with('bar')->orderBy('name')->get();
-        return view('admin.menu_items.edit', compact('barMenuItem','categories'))->with('catName','menu');
+        $bars = Bar::orderBy('name')->get();
+        $categories = BarMenuCategory::orderBy('name')->get();
+
+        return view('admin.bar-menu-items.create', [
+            'barMenuItem' => $bar_menu_item,
+            'bars' => $bars,
+            'categories' => $categories,
+            'title' => 'Edit Menu Item',
+            'catName' => 'bar',
+            'subCatName' => 'bar-menu-items',
+            'scrollspy' => false,
+            'simplePage' => false,
+        ]);
     }
 
-    public function update(Request $request, BarMenuItem $barMenuItem)
+    public function update(Request $request, BarMenuItem $bar_menu_item)
     {
         $data = $request->validate([
+            'bar_id' => 'required|exists:bars,id',
             'bar_menu_category_id' => 'required|exists:bar_menu_categories,id',
-            'name' => 'required|string|max:191',
-            'price' => 'nullable|numeric',
+            'name' => 'required|string|max:150|unique:bar_menu_items,name,' . $bar_menu_item->id,
+            'price' => 'required|numeric|min:0',
             'description' => 'nullable|string',
-            'image' => 'nullable|image|max:4096',
+            'image' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048',
+            'status' => 'nullable|in:0,1',
         ]);
 
+        // If new image uploaded, delete old image
         if ($request->hasFile('image')) {
-            // delete old
-            if ($barMenuItem->image) Storage::disk('public')->delete($barMenuItem->image);
-
-            $file = $request->file('image');
-            $path = $file->storePublicly('bars/menu-items', 'public');
-
-            if (class_exists(Image::class)) {
-                $full = storage_path('app/public/'.$path);
-                Image::make($full)->fit(800,600,function($c){ $c->upsize(); })->save();
+            if ($bar_menu_item->image && Storage::disk('public')->exists($bar_menu_item->image)) {
+                Storage::disk('public')->delete($bar_menu_item->image);
             }
 
-            $data['image'] = $path;
+            $data['image'] = $request->file('image')->store('menu-items', 'public');
         }
 
-        $barMenuItem->update($data);
+        $bar_menu_item->update($data);
 
-        return redirect(url('admin/bar-menu-items'))->with('success','Menu item updated.');
+        return redirect()->route('admin.bar-menu-items.index')
+            ->with('success', 'Menu Item updated successfully.');
     }
 
-    public function destroy(BarMenuItem $barMenuItem)
+    public function toggleStatus($id)
     {
-        if ($barMenuItem->image) Storage::disk('public')->delete($barMenuItem->image);
-        $barMenuItem->delete();
-        return redirect(url('admin/bar-menu-items'))->with('success','Menu item deleted.');
+        $item = BarMenuItem::findOrFail($id);
+        $item->status = $item->status == 1 ? 0 : 1;
+        $item->save();
+
+        return response()->json([
+            'success' => true,
+            'status' => $item->status
+        ]);
+    }
+
+    public function destroy(BarMenuItem $bar_menu_item)
+    {
+        if ($bar_menu_item->image && Storage::disk('public')->exists($bar_menu_item->image)) {
+            Storage::disk('public')->delete($bar_menu_item->image);
+        }
+
+        $bar_menu_item->delete();
+
+        return back()->with('success', 'Menu Item deleted successfully.');
     }
 }

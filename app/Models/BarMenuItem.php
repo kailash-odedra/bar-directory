@@ -7,7 +7,13 @@ use Illuminate\Database\Eloquent\Model;
 class BarMenuItem extends Model
 {
     protected $fillable = [
-        'bar_id', 'bar_menu_category_id', 'name', 'price', 'image', 'description'
+        'bar_id',
+        'bar_menu_category_id',
+        'name',
+        'price',
+        'image',
+        'description',
+        'status'
     ];
 
     public function bar()
@@ -17,6 +23,7 @@ class BarMenuItem extends Model
 
     public function category()
     {
-        return $this->belongsTo(BarMenuCategory::class);
+        return $this->belongsTo(BarMenuCategory::class, 'bar_menu_category_id');
     }
 }
+

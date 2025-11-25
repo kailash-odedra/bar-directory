@@ -48,13 +48,14 @@ class EventController extends Controller
         $data = $request->validate([
             'bar_id' => 'required|exists:bars,id',
             'title' => 'required|string|max:191',
+            'type' => 'required|in:event,offer',
             'description' => 'nullable|string',
             'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
             'start_time' => 'required|date',
             'end_time' => 'nullable|date|after_or_equal:start_time',
             'ticket_link' => 'nullable|url',
         ]);
-
+        $data['status'] = 1;
         if ($request->hasFile('image')) {
             $data['image'] = $request->file('image')->store('events', 'public');
         }
@@ -83,6 +84,7 @@ class EventController extends Controller
         $data = $request->validate([
             'bar_id' => 'required|exists:bars,id',
             'title' => 'required|string|max:191',
+            'type' => 'required|in:event,offer',
             'description' => 'nullable|string',
             'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
             'start_time' => 'required|date',
@@ -101,7 +103,16 @@ class EventController extends Controller
 
         return redirect()->route('admin.events.index')->with('success', 'Event updated successfully.');
     }
-
+    public function toggleStatus($id)
+    {
+        $event = Event::findOrFail($id);
+        $event->status = $event->status == 1 ? 2 : 1;
+        $event->save();
+        return response()->json([
+            'success' => true,
+            'status' => $event->status
+        ]);
+    }
     public function destroy(Event $event)
     {
         if ($event->image) {

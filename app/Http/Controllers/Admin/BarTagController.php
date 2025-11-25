@@ -44,7 +44,7 @@ class BarTagController extends Controller
             'name' => 'required|string|max:120|unique:tags,name',
             'slug' => 'nullable|string|max:150|unique:tags,slug',
         ]);
-
+        $data['status'] = 1;
         $data['slug'] = $data['slug'] ?: Str::slug($data['name']);
 
         BarTag::create($data);
@@ -77,7 +77,16 @@ class BarTagController extends Controller
 
         return redirect()->route('admin.bar-tags.index')->with('success', 'Tag updated successfully.');
     }
-
+    public function toggleStatus($id)
+    {
+        $barTag = BarTag::findOrFail($id);
+        $barTag->status = $barTag->status == 1 ? 2 : 1;
+        $barTag->save();
+        return response()->json([
+            'success' => true,
+            'status' => $barTag->status
+        ]);
+    }
     public function destroy(BarTag $barTag)
     {
         $barTag->delete();

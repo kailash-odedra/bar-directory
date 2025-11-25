@@ -20,13 +20,8 @@ class BarController extends Controller
     public function index()
     {
         $bars = Bar::with(['location.country','location.state','tags'])->paginate(20);
-        return view('admin.bars.index', [
-            'bars' => $bars,
-            'title' => 'Bars List',
-            'catName' => 'bar',
-            'scrollspy' => false,
-            'simplePage' => false,
-        ]);
+        return view('admin.bars.index', compact('bars'))
+            ->with(['title'=>'Bars List','catName'=>'bar','scrollspy'=>false,'simplePage'=>false]);
     }
 
     public function create()
@@ -35,25 +30,39 @@ class BarController extends Controller
         $states = State::all();
         $tags = BarTag::all();
 
-        return view('admin.bars.create', [
-            'countries' => $countries,
-            'states' => $states,
-            'tags' => $tags,
-            'title' => 'Create Bar',
-            'catName' => 'bar',
-            'scrollspy' => false,
-            'simplePage' => false,
-        ]);
+        return view('admin.bars.create', compact('countries','states','tags'))
+            ->with(['title'=>'Create Bar','catName'=>'bar','scrollspy'=>false,'simplePage'=>false]);
     }
 
     public function store(Request $request)
     {
+        // Validation
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'slug' => 'nullable|string|max:255|unique:bars,slug',
+            'short_description' => 'nullable|string|max:500',
+            'full_description' => 'nullable|string',
+            'video_url' => 'nullable|url',
+            'logo' => 'nullable|image|max:2048',
+            'cover_image' => 'nullable|image|max:4096',
+            'gallery.*' => 'nullable|image|max:4096',
+            'meta_title' => 'nullable|string|max:255',
+            'meta_description' => 'nullable|string|max:500',
+            'meta_keywords' => 'nullable|string|max:255',
+            'facebook'=>'nullable|string',
+            'instagram'=>'nullable|string',
+            'tiktok'=>'nullable|string',
+            'youtube'=>'nullable|string',
+            'website'=>'nullable|string',
+            'tags'=>'nullable|array',
+            'tags.*'=>'exists:tags,id'
+        ]);
         $data = $request->only([
             'name','slug','short_description','full_description','video_url',
             'meta_title','meta_description','meta_keywords',
             'facebook','instagram','tiktok','youtube','website'
         ]);
-
+        $data['status'] = 1;
         $data['slug'] = $data['slug'] ?: Str::slug($request->name.'-'.uniqid());
 
         if ($request->hasFile('logo')) {
@@ -63,7 +72,9 @@ class BarController extends Controller
         if ($request->hasFile('cover_image')) {
             $data['cover_image'] = $this->storeImage($request->file('cover_image'), 'bars/cover');
         }
+
         $bar = Bar::create($data);
+
         if ($request->filled('tags')) {
             $bar->tags()->sync($request->tags);
         }
@@ -71,13 +82,13 @@ class BarController extends Controller
         if ($request->hasFile('gallery')) {
             foreach ($request->file('gallery') as $image) {
                 $path = $this->storeImage($image, 'bars/gallery');
-                $bar->images()->create([
-                    'bar_id' => $bar->id,
-                    'path'   => $path,
-                ]);
+                $bar->images()->create(['bar_id'=>$bar->id,'path'=>$path]);
             }
         }
+
+        $this->saveLocation($bar, $request);
         $this->saveTimings($bar, $request->timing ?? []);
+
         return redirect()->route('admin.bar.index')->with('success', 'Bar created successfully');
     }
 
@@ -87,20 +98,34 @@ class BarController extends Controller
         $countries = Country::all();
         $states = State::all();
         $tags = BarTag::all();
-        return view('admin.bars.create', [
-            'bar' => $bar,
-            'countries' => $countries,
-            'states' => $states,
-            'tags' => $tags,
-            'title' => 'Edit Bar',
-            'catName' => 'bar',
-            'scrollspy' => false,
-            'simplePage' => false,
-        ]);
+        return view('admin.bars.create', compact('bar','countries','states','tags'))
+            ->with(['title'=>'Edit Bar','catName'=>'bar','scrollspy'=>false,'simplePage'=>false]);
     }
 
     public function update(Request $request, Bar $bar)
     {
+        // Validation
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'slug' => 'nullable|string|max:255|unique:bars,slug,'.$bar->id,
+            'short_description' => 'nullable|string|max:500',
+            'full_description' => 'nullable|string',
+            'video_url' => 'nullable|url',
+            'logo' => 'nullable|image|max:2048',
+            'cover_image' => 'nullable|image|max:4096',
+            'gallery.*' => 'nullable|image|max:4096',
+            'meta_title' => 'nullable|string|max:255',
+            'meta_description' => 'nullable|string|max:500',
+            'meta_keywords' => 'nullable|string|max:255',
+            'facebook'=>'nullable|string',
+            'instagram'=>'nullable|string',
+            'tiktok'=>'nullable|string',
+            'youtube'=>'nullable|string',
+            'website'=>'nullable|string',
+            'tags'=>'nullable|array',
+            'tags.*'=>'exists:tags,id'
+        ]);
+
         $data = $request->only([
             'name','slug','short_description','full_description','video_url',
             'meta_title','meta_description','meta_keywords',
@@ -118,6 +143,7 @@ class BarController extends Controller
         }
 
         $bar->update($data);
+
         if ($request->has('tags')) {
             $bar->tags()->sync($request->tags);
         }
@@ -127,10 +153,7 @@ class BarController extends Controller
         if ($request->hasFile('gallery')) {
             foreach ($request->file('gallery') as $image) {
                 $path = $this->storeImage($image, 'bars/gallery');
-                $bar->images()->create([
-                    'bar_id' => $bar->id,
-                    'path'   => $path,
-                ]);
+                $bar->images()->create(['bar_id'=>$bar->id,'path'=>$path]);
             }
         }
 
@@ -151,6 +174,27 @@ class BarController extends Controller
 
         $bar->delete();
         return back()->with('success','Bar deleted');
+    }
+
+    // Toggle status
+    public function toggleStatus($id)
+    {
+        $bar = Bar::findOrFail($id);
+        $bar->status = $bar->status == 1 ? 2 : 1;
+        $bar->save();
+        return response()->json([
+            'success' => true,
+            'status' => $bar->status
+        ]);
+    }
+
+    // Approve bar (admin action)
+    public function approve($id)
+    {
+        $bar = Bar::findOrFail($id);
+        $bar->status = 1; // Active
+        $bar->save();
+        return redirect()->back()->with('success','Bar approved successfully');
     }
 
     protected function saveLocation(Bar $bar, Request $r)
@@ -179,10 +223,11 @@ class BarController extends Controller
                 'weekday'    => $weekday,
                 'open_time'  => $row['open_time'] ?? null,
                 'close_time' => $row['close_time'] ?? null,
-                'is_closed'  => isset($row['is_closed']), 
+                'is_closed'  => isset($row['is_closed']),
             ]);
         }
     }
+
     protected function storeImage($file, $folder)
     {
         $path = $file->storePublicly($folder, 'public');

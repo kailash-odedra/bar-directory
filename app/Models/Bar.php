@@ -46,6 +46,9 @@ class Bar extends Model
     {
         return $this->belongsTo(State::class);
     }
+    public function isActive() {
+        return $this->status == 1;
+    }
 
 }
 

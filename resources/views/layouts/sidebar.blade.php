@@ -66,18 +66,39 @@
                 <ul class="collapse submenu list-unstyled {{ ($catName === 'bar') ? 'show' : '' }}"
                     id="barMenu"
                     data-bs-parent="#accordionExample">
-                    
+
                     <li class="{{ Request::is('admin/bar') ? 'active' : '' }}">
                         <a href="{{ url('admin/bar') }}">All Bars</a>
                     </li>
+
                     <li class="{{ Request::is('admin/bar-tags*') ? 'active' : '' }}">
                         <a href="{{ url('admin/bar-tags') }}">Tags / Categories</a>
                     </li>
+
                     <li class="{{ Request::is('admin/events*') ? 'active' : '' }}">
-                        <a href="{{ url('admin/events') }}">Events</a>
+                        <a href="{{ url('admin/events') }}">Events / Offers</a>
+                    </li>
+                    <li class="{{ Request::is('admin/bookings*') ? 'active' : '' }}">
+                        <a href="{{ url('admin/bookings') }}">Bookings</a>
+                    </li>
+                    <li class="{{ Request::is('admin/claims*') ? 'active' : '' }}">
+                        <a href="{{ url('admin/claims') }}">Bar Claims</a>
+                    </li>
+
+                    <li class="{{ Request::is('admin/bar-reviews*') ? 'active' : '' }}">
+                        <a href="{{ url('admin/bar-reviews') }}">Reviews & Ratings</a>
+                    </li>
+
+                    <li class="{{ Request::is('admin/bar-menu-categories') ? 'active' : '' }}">
+                        <a href="{{ url('admin/bar-menu-categories') }}">Menu Categories</a>
+                    </li>
+
+                    <li class="{{ Request::is('admin/bar-menu-items') ? 'active' : '' }}">
+                        <a href="{{ url('admin/bar-menu-items') }}">Menu Items</a>
                     </li>
                 </ul>
             </li>
+
 
             <li class="menu {{ ($catName === 'dashboard') ? 'active' : '' }}">
                 <a href="#dashboard" data-bs-toggle="collapse" aria-expanded=" {{ ($catName === 'dashboard') ? 'true' : 'false' }}" class="dropdown-toggle">

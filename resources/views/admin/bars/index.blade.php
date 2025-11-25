@@ -45,7 +45,13 @@
                                     @endforeach
                                 </td>
                                 <td>{{ $bar->reviews->avg('rating') ?? 0 }}</td>
-                                <td>{{ $bar->active ? 'Active' : 'Inactive' }}</td>
+                                <td>
+                                    <button type="button" 
+                                        class="btn btn-sm toggle-status-btn {{ $bar->status == 1 ? 'btn-success' : 'btn-danger' }}" 
+                                        data-id="{{ $bar->id }}">
+                                        {{ $bar->status == 1 ? 'Active' : 'Inactive' }}
+                                    </button>
+                                </td>
                                 <td>{{ $bar->claimed ? 'Yes' : 'No' }}</td>
                                 <td>
                                     <a href="{{ route('admin.bar.edit', $bar->id) }}" class="btn btn-sm btn-primary">Edit</a>
@@ -80,3 +86,38 @@
     <script src="{{asset('plugins/src/table/datatable/button-ext/buttons.print.min.js')}}"></script>
     <script src="{{asset('plugins/src/table/datatable/custom_miscellaneous.js')}}"></script>
 @endsection
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const buttons = document.querySelectorAll('.toggle-status-btn');
+    buttons.forEach(button => {
+        button.addEventListener('click', function() {
+            const barId = this.dataset.id;
+            const btn = this;
+            fetch(`/admin/bar/${barId}/toggle-status`, {
+                method: 'POST',
+                headers: {
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({})
+            })
+            .then(response => response.json())
+            .then(data => {
+                if(data.success){
+                    if(data.status == 1){
+                        btn.classList.remove('btn-danger');
+                        btn.classList.add('btn-success');
+                        btn.textContent = 'Active';
+                    } else {
+                        btn.classList.remove('btn-success');
+                        btn.classList.add('btn-danger');
+                        btn.textContent = 'Inactive';
+                    }
+                }
+            })
+            .catch(err => console.error('Error:', err));
+        });
+    });
+});
+</script>

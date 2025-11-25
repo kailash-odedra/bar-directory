@@ -3,10 +3,15 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
-
 class BarReview extends Model
 {
-    protected $fillable = ['bar_id', 'user_id', 'rating', 'comment', 'status'];
+    protected $fillable = [
+        'bar_id',
+        'user_id',
+        'rating',
+        'comment',
+        'status'
+    ];
 
     public function bar()
     {

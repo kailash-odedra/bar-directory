@@ -1,11 +1,9 @@
 <?php
-
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\BarReview;
-use App\Models\Bar;
 
 class BarReviewController extends Controller
 {
@@ -14,23 +12,21 @@ class BarReviewController extends Controller
         $q = $request->get('q');
         $status = $request->get('status');
 
-        $reviews = BarReview::with(['bar','user'])
-                    ->when($q, fn($b) => $b->where('comment','like', "%{$q}%"))
-                    ->when($status, fn($b) => $b->where('status', $status))
-                    ->orderBy('created_at','desc')
-                    ->paginate(25)->withQueryString();
+        $reviews = BarReview::with(['bar', 'user'])
+            ->when($q, fn($q1) => $q1->where('comment', 'like', "%{$q}%"))
+            ->when($status, fn($q2) => $q2->where('status', $status))
+            ->orderBy('created_at', 'desc')
+            ->paginate(25)
+            ->withQueryString();
 
-        return view('admin.reviews.index', compact('reviews'))->with('catName','bar');
-    }
-
-    public function show(BarReview $barReview)
-    {
-        return view('admin.reviews.show', compact('barReview'))->with('catName','bar');
-    }
-
-    public function edit(BarReview $barReview)
-    {
-        return view('admin.reviews.edit', compact('barReview'))->with('catName','bar');
+        return view('admin.reviews.index', [
+            'reviews' => $reviews,
+            'title' => 'Bar Reviews',
+            'catName' => 'bar',
+            'subCatName' => 'reviews',
+            'scrollspy' => false,
+            'simplePage' => false,
+        ]);
     }
 
     public function update(Request $request, BarReview $barReview)
@@ -42,20 +38,32 @@ class BarReviewController extends Controller
         ]);
 
         $barReview->update($data);
-
-        return redirect(url('admin/bar-reviews'))->with('success','Review updated.');
+        return back()->with('success', 'Review updated successfully.');
     }
 
     public function destroy(BarReview $barReview)
     {
         $barReview->delete();
-        return redirect(url('admin/bar-reviews'))->with('success','Review deleted.');
+        return back()->with('success', 'Review removed.');
     }
 
-    // quick approve endpoint (optional)
-    public function approve(BarReview $barReview)
+    // AJAX Approve
+    public function approve($id)
     {
-        $barReview->update(['status' => 'approved']);
-        return back()->with('success','Review approved.');
+        $review = BarReview::findOrFail($id);
+        $review->status = 'approved';
+        $review->save();
+
+        return response()->json(['success' => true]);
+    }
+
+    // AJAX Hide
+    public function hide($id)
+    {
+        $review = BarReview::findOrFail($id);
+        $review->status = 'hidden';
+        $review->save();
+
+        return response()->json(['success' => true]);
     }
 }

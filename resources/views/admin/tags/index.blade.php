@@ -25,6 +25,7 @@
                             <th>Name</th>
                             <th>Slug</th>
                             <th>Created At</th>
+                            <th>Status</th>
                             <th>Actions</th>
                         </tr>
                     </thead>
@@ -34,6 +35,13 @@
                                 <td>{{ $tag->name }}</td>
                                 <td>{{ $tag->slug }}</td>
                                 <td>{{ $tag->created_at->format('d M, Y') }}</td>
+                                <td>
+                                    <button type="button" 
+                                        class="btn btn-sm toggle-status-btn {{ $tag->status == 1 ? 'btn-success' : 'btn-danger' }}" 
+                                        data-id="{{ $tag->id }}">
+                                        {{ $tag->status == 1 ? 'Active' : 'Inactive' }}
+                                    </button>
+                                </td>
                                 <td>
                                     <a href="{{ route('admin.bar-tags.edit', $tag->id) }}" class="btn btn-sm btn-primary">Edit</a>
                                     <form action="{{ route('admin.bar-tags.destroy', $tag->id) }}" method="POST" class="d-inline">
@@ -64,3 +72,38 @@
 <script src="{{asset('plugins/src/table/datatable/button-ext/buttons.print.min.js')}}"></script>
 <script src="{{asset('plugins/src/table/datatable/custom_miscellaneous.js')}}"></script>
 @endsection
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const buttons = document.querySelectorAll('.toggle-status-btn');
+    buttons.forEach(button => {
+        button.addEventListener('click', function() {
+            const barId = this.dataset.id;
+            const btn = this;
+            fetch(`/admin/bar-tags/${barId}/toggle-status`, {
+                method: 'POST',
+                headers: {
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({})
+            })
+            .then(response => response.json())
+            .then(data => {
+                if(data.success){
+                    if(data.status == 1){
+                        btn.classList.remove('btn-danger');
+                        btn.classList.add('btn-success');
+                        btn.textContent = 'Active';
+                    } else {
+                        btn.classList.remove('btn-success');
+                        btn.classList.add('btn-danger');
+                        btn.textContent = 'Inactive';
+                    }
+                }
+            })
+            .catch(err => console.error('Error:', err));
+        });
+    });
+});
+</script>
