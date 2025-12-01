@@ -18,7 +18,7 @@
             </div>
             @endif
 
-            <form class="row g-3" action="{{ isset($bar) ? route('admin.bar.update', $bar->id) : route('admin.bar.store') }}" method="POST" enctype="multipart/form-data">
+            <form class="row g-3" action="{{ isset($bar) ? route('admin.bar.update', $bar) : route('admin.bar.store') }}" method="POST" enctype="multipart/form-data">
                 @csrf
                 @if(isset($bar)) @method('PUT') @endif
 
@@ -194,6 +194,20 @@
                     </div>
 
                 </div>
+                
+                {{-- Featured & Status --}}
+                <div class="row mt-4">
+                    <div class="col-md-6 mb-3">
+                        <div class="form-check form-switch">
+                            <input class="form-check-input" type="checkbox" name="is_featured" id="is_featured" 
+                                {{ old('is_featured', isset($bar) && $bar->is_featured ? 'checked' : '') }}>
+                            <label class="form-check-label" for="is_featured">
+                                <strong>Featured Bar</strong> (Show on homepage)
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
                 <h4 class="mt-4">SEO Settings</h4>
                 <div class="row">
                     <div class="col-md-6 mb-3">
@@ -260,6 +274,7 @@
                     <button type="submit" class="btn btn-primary">
                         {{ isset($bar) ? 'Update' : 'Create' }}
                     </button>
+                    <a href="{{ route('admin.bar.index') }}" class="btn btn-secondary ms-2">Cancel</a>
                 </div>
 
             </form>

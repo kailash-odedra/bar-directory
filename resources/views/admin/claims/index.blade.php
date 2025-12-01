@@ -16,30 +16,51 @@
         <div class="statbox widget box box-shadow">
             <div class="widget-content widget-content-area mt-3">
                 <div class="d-flex justify-content-between align-items-center mt-3">
-                    <h5 class="mb-0">Claim List</h5>
+                    <h5 class="mb-0">Bar Claims List</h5>
                 </div>
+
                 <table id="html5-extension" class="table dt-table-hover" style="width:100%">
                     <thead>
                         <tr>
-                            <th>Bar</th>
-                            <th>User</th>
+                            <th>Claim ID</th>
+                            <th>Bar Name</th>
+                            <th>Owner Name</th>
+                            <th>Email</th>
+                            <th>Phone</th>
+                            <th>Role</th>
                             <th>Status</th>
-                            <th>Claimed</th>
+                            <th>Submitted</th>
+                            <th>Actions</th>
                         </tr>
                     </thead>
                     <tbody>
-                       @foreach($claims as $claim)
+                        @foreach($claims as $claim)
                         <tr>
-                            <td>{{ $claim->bar->name }}</td>
-                            <td>{{ $claim->user->name }}</td>
-                            <td>{{ ucfirst($claim->status) }}</td>
+                            <td>{{ $claim->claim_request_id ?? 'N/A' }}</td>
+                            <td>{{ $claim->bar->name ?? 'N/A' }}</td>
+                            <td>{{ $claim->full_name ?? ($claim->user->name ?? 'N/A') }}</td>
+                            <td>{{ $claim->email_address ?? ($claim->user->email ?? 'N/A') }}</td>
+                            <td>{{ $claim->phone_number ?? '-' }}</td>
+                            <td>{{ $claim->role ?? '-' }}</td>
                             <td>
-                                <button class="btn btn-success btn-sm approve-btn" data-id="{{ $claim->id }}">Approve</button>
-                                <button class="btn btn-danger btn-sm reject-btn" data-id="{{ $claim->id }}">Reject</button>
+                                @if($claim->verification_status == 'pending')
+                                    <span class="badge bg-warning">Pending</span>
+                                @elseif($claim->verification_status == 'needs_info')
+                                    <span class="badge bg-info">Needs Info</span>
+                                @elseif($claim->verification_status == 'approved')
+                                    <span class="badge bg-success">Approved</span>
+                                @elseif($claim->verification_status == 'rejected')
+                                    <span class="badge bg-danger">Rejected</span>
+                                @else
+                                    <span class="badge bg-secondary">{{ ucfirst($claim->status ?? 'Pending') }}</span>
+                                @endif
+                            </td>
+                            <td>{{ $claim->created_at ? $claim->created_at->format('M d, Y') : 'N/A' }}</td>
+                            <td>
+                                <a href="{{ route('admin.claims.show', $claim) }}" class="btn btn-sm btn-primary">View</a>
                             </td>
                         </tr>
                         @endforeach
-
                     </tbody>
                 </table>
 
@@ -60,47 +81,3 @@
 <script src="{{asset('plugins/src/table/datatable/button-ext/buttons.print.min.js')}}"></script>
 <script src="{{asset('plugins/src/table/datatable/custom_miscellaneous.js')}}"></script>
 @endsection
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-    document.addEventListener('click', function (e) {
-        if (e.target.classList.contains('approve-btn')) {
-            let id = e.target.dataset.id;
-            fetch(`/admin/claims/${id}/approve`, {
-                method: 'POST',
-                headers: {
-                    'X-CSRF-TOKEN': '{{ csrf_token() }}',
-                    'Accept': 'application/json',
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({})
-            })
-            .then(res => res.json())
-            .then(data => {
-                if(data.success){
-                    location.reload();
-                }
-            });
-        }
-        if (e.target.classList.contains('reject-btn')) {
-            let id = e.target.dataset.id;
-            fetch(`/admin/claims/${id}/reject`, {
-                method: 'POST',
-                headers: {
-                    'X-CSRF-TOKEN': csrf,
-                    'Accept': 'application/json',
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({})
-            })
-            .then(res => res.json())
-            .then(data => {
-                if(data.success){
-                    location.reload();
-                }
-            });
-        }
-
-    });
-});
-
-</script>

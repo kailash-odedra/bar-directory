@@ -2,10 +2,12 @@
 
 namespace App\Models;
 
+use App\Traits\HasEncryptedRouteKey;
 use Illuminate\Database\Eloquent\Model;
 
 class BarTag extends Model
 {
+    use HasEncryptedRouteKey;
     protected $table = 'tags';
     protected $fillable = ['name', 'slug','status'];
 

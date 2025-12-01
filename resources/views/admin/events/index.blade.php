@@ -56,8 +56,8 @@
                                     </button>
                                 </td>
                             <td>
-                                <a href="{{ route('admin.events.edit', $event->id) }}" class="btn btn-sm btn-primary">Edit</a>
-                                <form action="{{ route('admin.events.destroy', $event->id) }}" method="POST" class="d-inline">
+                                <a href="{{ route('admin.events.edit', $event) }}" class="btn btn-sm btn-primary">Edit</a>
+                                <form action="{{ route('admin.events.destroy', $event) }}" method="POST" class="d-inline">
                                     @csrf
                                     @method('DELETE')
                                     <button class="btn btn-sm btn-danger" onclick="return confirm('Delete this event?')">Delete</button>

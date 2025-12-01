@@ -51,9 +51,12 @@
                         value="{{ old('name', $menuCategory->name ?? '') }}" required>
                 </div>
 
-                <button type="submit" class="btn btn-primary">
-                    {{ isset($menuCategory) ? 'Update' : 'Create' }}
-                </button>
+                <div class="mt-3">
+                    <button type="submit" class="btn btn-primary">
+                        {{ isset($menuCategory) ? 'Update' : 'Create' }}
+                    </button>
+                    <a href="{{ route('admin.bar-menu-categories.index') }}" class="btn btn-secondary ms-2">Cancel</a>
+                </div>
 
             </form>
         </div>

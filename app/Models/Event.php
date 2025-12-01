@@ -2,10 +2,12 @@
 
 namespace App\Models;
 
+use App\Traits\HasEncryptedRouteKey;
 use Illuminate\Database\Eloquent\Model;
 
 class Event extends Model
 {
+    use HasEncryptedRouteKey;
     protected $fillable = [
         'bar_id', 'title', 'description', 'start_time', 'end_time','image', 'ticket_link','status','type'
     ];

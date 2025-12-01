@@ -13,51 +13,158 @@
 {{-- <link href="../src/plugins/src/apex/apexcharts.css" rel="stylesheet" type="text/css">
 <link href="../src/assets/css/light/dashboard/dash_1.css" rel="stylesheet" type="text/css" />
 <link href="../src/assets/css/dark/dashboard/dash_1.css" rel="stylesheet" type="text/css" /> --}}
+<style>
+    .widget-one_hybrid a {
+        text-decoration: none !important;
+        color: inherit !important;
+    }
+    .widget-one_hybrid:hover {
+        transform: translateY(-2px);
+        transition: transform 0.2s ease;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.1) !important;
+    }
+    .layout-spacing {
+        margin-bottom: 20px;
+    }
+</style>
 @endsection
 
 @section('content')
 <div class="row layout-top-spacing">
 
-    <div class="col-xl-4 col-lg-12 col-md-12 col-sm-12 col-12 layout-spacing">
-        <div class="widget widget-six">
-            <div class="widget-heading">
-                <h6 class="">Statistics</h6>
-                <div class="task-action">
-                    <div class="dropdown">
-                        <a class="dropdown-toggle" href="#" role="button" id="statistics" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-more-horizontal"><circle cx="12" cy="12" r="1"></circle><circle cx="19" cy="12" r="1"></circle><circle cx="5" cy="12" r="1"></circle></svg>
-                        </a>
-
-                        <div class="dropdown-menu left" aria-labelledby="statistics" style="will-change: transform;">
-                            <a class="dropdown-item" href="javascript:void(0);">View</a>
-                            <a class="dropdown-item" href="javascript:void(0);">Download</a>
+    <!-- Dashboard Overview Statistics -->
+    <!-- Total Bars -->
+    <div class="col-xl-2 col-lg-4 col-md-6 col-sm-6 col-12 layout-spacing">
+        <a href="{{ route('admin.bar.index') }}" class="text-decoration-none" style="color: inherit;">
+            <div class="widget widget-one_hybrid widget-followers">
+                <div class="widget-heading">
+                    <div class="w-title">
+                        <div class="w-icon">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-home">
+                                <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+                                <polyline points="9 22 9 12 15 12 15 22"></polyline>
+                            </svg>
+                        </div>
+                        <div class="">
+                            <p class="w-value">{{ number_format($totalBars) }}</p>
+                            <h5 class="">Total Bars</h5>
                         </div>
                     </div>
                 </div>
-            </div>
-            <div class="w-chart">
-                <div class="w-chart-section">
-                    <div class="w-detail">
-                        <p class="w-title">Total Visits</p>
-                        <p class="w-stats">423,964</p>
-                    </div>
-                    <div class="w-chart-render-one">
-                        <div id="total-users"></div>
+                <div class="widget-content">    
+                    <div class="w-chart">
+                        <div id="total-bars-chart"></div>
                     </div>
                 </div>
+            </div>
+        </a>
+    </div>
 
-                <div class="w-chart-section">
-                    <div class="w-detail">
-                        <p class="w-title">Paid Visits</p>
-                        <p class="w-stats">7,929</p>
+    <!-- Claimed Bars -->
+    <div class="col-xl-2 col-lg-4 col-md-6 col-sm-6 col-12 layout-spacing">
+        <a href="{{ route('admin.bar.index', ['claimed' => 1]) }}" class="text-decoration-none" style="color: inherit;">
+            <div class="widget widget-one_hybrid widget-referral">
+                <div class="widget-heading">
+                    <div class="w-title">
+                        <div class="w-icon">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-check-circle">
+                                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                                <polyline points="22 4 12 14.01 9 11.01"></polyline>
+                            </svg>
+                        </div>
+                        <div class="">
+                            <p class="w-value">{{ number_format($claimedBars) }}</p>
+                            <h5 class="">Claimed Bars</h5>
+                        </div>
                     </div>
-                    <div class="w-chart-render-one">
-                        <div id="paid-visits"></div>
+                </div>
+                <div class="widget-content">    
+                    <div class="w-chart">
+                        <div id="claimed-bars-chart"></div>
                     </div>
                 </div>
             </div>
-        </div>
-        
+        </a>
+    </div>
+
+    <!-- Pending Claims -->
+    <div class="col-xl-2 col-lg-4 col-md-6 col-sm-6 col-12 layout-spacing">
+        <a href="{{ route('admin.claims.index', ['status' => 'pending']) }}" class="text-decoration-none" style="color: inherit;">
+            <div class="widget widget-one_hybrid widget-engagement">
+                <div class="widget-heading">
+                    <div class="w-title">
+                        <div class="w-icon">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-clock">
+                                <circle cx="12" cy="12" r="10"></circle>
+                                <polyline points="12 6 12 12 16 14"></polyline>
+                            </svg>
+                        </div>
+                        <div class="">
+                            <p class="w-value">{{ number_format($pendingClaims) }}</p>
+                            <h5 class="">Pending Claims</h5>
+                        </div>
+                    </div>
+                </div>
+                <div class="widget-content">    
+                    <div class="w-chart">
+                        <div id="pending-claims-chart"></div>
+                    </div>
+                </div>
+            </div>
+        </a>
+    </div>
+
+    <!-- Active Reviews -->
+    <div class="col-xl-2 col-lg-4 col-md-6 col-sm-6 col-12 layout-spacing">
+        <a href="{{ route('admin.bar-reviews.index', ['status' => 1]) }}" class="text-decoration-none" style="color: inherit;">
+            <div class="widget widget-one_hybrid widget-followers">
+                <div class="widget-heading">
+                    <div class="w-title">
+                        <div class="w-icon">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-star">
+                                <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+                            </svg>
+                        </div>
+                        <div class="">
+                            <p class="w-value">{{ number_format($activeReviews) }}</p>
+                            <h5 class="">Active Reviews</h5>
+                        </div>
+                    </div>
+                </div>
+                <div class="widget-content">    
+                    <div class="w-chart">
+                        <div id="active-reviews-chart"></div>
+                    </div>
+                </div>
+            </div>
+        </a>
+    </div>
+
+    <!-- Featured Bars -->
+    <div class="col-xl-2 col-lg-4 col-md-6 col-sm-6 col-12 layout-spacing">
+        <a href="{{ route('admin.bar.index', ['featured' => 1]) }}" class="text-decoration-none" style="color: inherit;">
+            <div class="widget widget-one_hybrid widget-referral">
+                <div class="widget-heading">
+                    <div class="w-title">
+                        <div class="w-icon">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-award">
+                                <circle cx="12" cy="8" r="7"></circle>
+                                <polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88"></polyline>
+                            </svg>
+                        </div>
+                        <div class="">
+                            <p class="w-value">{{ number_format($featuredBars) }}</p>
+                            <h5 class="">Featured Bars</h5>
+                        </div>
+                    </div>
+                </div>
+                <div class="widget-content">    
+                    <div class="w-chart">
+                        <div id="featured-bars-chart"></div>
+                    </div>
+                </div>
+            </div>
+        </a>
     </div>
     
     <div class="col-xl-4 col-lg-6 col-md-6 col-sm-12 col-12 layout-spacing">
@@ -493,60 +600,124 @@
 
     </div>
 
-    <div class="col-xl-4 col-lg-6 col-md-6 col-sm-12 col-12 layout-spacing">
-        <div class="widget widget-card-one">
+    {{-- Analytics Charts Section --}}
+    <div class="col-xl-6 col-lg-12 col-md-12 col-sm-12 col-12 layout-spacing">
+        <div class="widget widget-chart-three">
+            <div class="widget-heading">
+                <h5 class="">Top Rated Bars (4+ Stars)</h5>
+            </div>
             <div class="widget-content">
-
-                <div class="media">
-                    <div class="w-img">
-                        <img src="{{Vite::asset('resources/images/profile-19.jpeg')}}" alt="avatar">
-                    </div>
-                    <div class="media-body">
-                        <h6>Jimmy Turner</h6>
-                        <p class="meta-date-time">Monday, May 18</p>
-                    </div>
-                </div>
-
-                <p>"Duis aute irure dolor" in reprehenderit in voluptate velit esse cillum "dolore eu fugiat" nulla pariatur. Excepteur sint occaecat cupidatat non proident.</p>
-
-                <div class="w-action">
-                    <div class="card-like">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-thumbs-up"><path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3zM7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"></path></svg>
-                        <span>551 Likes</span>
-                    </div>
-
-                    <div class="read-more">
-                        <a href="javascript:void(0);">Read More <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-chevrons-right"><polyline points="13 17 18 12 13 7"></polyline><polyline points="6 17 11 12 6 7"></polyline></svg></a>
-                    </div>
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Bar Name</th>
+                                <th>Location</th>
+                                <th>Rating</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @forelse($topRatedBars as $bar)
+                            <tr>
+                                <td>
+                                    <a href="{{ route('admin.bar.edit', $bar) }}">{{ $bar->name }}</a>
+                                </td>
+                                <td>
+                                    {{ $bar->location->city ?? 'N/A' }}, {{ $bar->location->state->name ?? '' }}
+                                </td>
+                                <td>
+                                    <span class="badge bg-success">{{ number_format($bar->avg_rating, 1) }} ⭐</span>
+                                </td>
+                            </tr>
+                            @empty
+                            <tr>
+                                <td colspan="3" class="text-center">No bars with 4+ star rating yet</td>
+                            </tr>
+                            @endforelse
+                        </tbody>
+                    </table>
                 </div>
             </div>
         </div>
     </div>
 
-    <div class="col-xl-4 col-lg-6 col-md-6 col-sm-12 col-12 layout-spacing">
-        <div class="widget widget-card-two">
+    <div class="col-xl-6 col-lg-12 col-md-12 col-sm-12 col-12 layout-spacing">
+        <div class="widget widget-chart-three">
+            <div class="widget-heading">
+                <h5 class="">Most Searched Cities</h5>
+            </div>
             <div class="widget-content">
-
-                <div class="media">
-                    <div class="w-img">
-                        <img src="{{Vite::asset('resources/images/g-8.png')}}" alt="avatar">
-                    </div>
-                    <div class="media-body">
-                        <h6>Dev Summit - New York</h6>
-                        <p class="meta-date-time">Bronx, NY</p>
-                    </div>
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>City</th>
+                                <th>Number of Bars</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @forelse($mostSearchedCities as $city)
+                            <tr>
+                                <td><strong>{{ $city->city }}</strong></td>
+                                <td>
+                                    <span class="badge bg-info">{{ $city->bar_count }} bars</span>
+                                </td>
+                            </tr>
+                            @empty
+                            <tr>
+                                <td colspan="2" class="text-center">No city data available</td>
+                            </tr>
+                            @endforelse
+                        </tbody>
+                    </table>
                 </div>
+            </div>
+        </div>
+    </div>
 
-                <div class="card-bottom-section">
-                    <h5>4 Members Going</h5>
-                    <div class="img-group">
-                        <img src="{{Vite::asset('resources/images/profile-19.jpeg')}}" alt="avatar">
-                        <img src="{{Vite::asset('resources/images/profile-6.jpeg')}}" alt="avatar">
-                        <img src="{{Vite::asset('resources/images/profile-8.jpeg')}}" alt="avatar">
-                        <img src="{{Vite::asset('resources/images/profile-3.jpeg')}}" alt="avatar">
-                    </div>
-                    <a href="javascript:void(0);" class="btn">View Details</a>
+    <div class="col-xl-6 col-lg-12 col-md-12 col-sm-12 col-12 layout-spacing">
+        <div class="widget widget-chart-three">
+            <div class="widget-heading">
+                <h5 class="">Trending Tags / Categories</h5>
+            </div>
+            <div class="widget-content">
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Tag Name</th>
+                                <th>Number of Bars</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @forelse($trendingTags as $tag)
+                            <tr>
+                                <td>
+                                    <span class="badge bg-secondary">{{ $tag->name }}</span>
+                                </td>
+                                <td>
+                                    <strong>{{ $tag->bars_count }} bars</strong>
+                                </td>
+                            </tr>
+                            @empty
+                            <tr>
+                                <td colspan="2" class="text-center">No tags available</td>
+                            </tr>
+                            @endforelse
+                        </tbody>
+                    </table>
                 </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-xl-6 col-lg-12 col-md-12 col-sm-12 col-12 layout-spacing">
+        <div class="widget widget-chart-three">
+            <div class="widget-heading">
+                <h5 class="">Reviews by Status</h5>
+            </div>
+            <div class="widget-content">
+                <div id="reviewsStatusChart"></div>
             </div>
         </div>
     </div>
@@ -558,5 +729,39 @@
 
 <script src="{{asset('plugins/src/apex/apexcharts.min.js')}}"></script>
 @vite(['resources/js/dashboard/dash_1.js'])
+
+<script>
+// Reviews by Status Chart
+document.addEventListener('DOMContentLoaded', function() {
+    const reviewsData = @json($reviewsByStatus);
+    
+    const reviewsStatusChart = {
+        series: [
+            reviewsData.approved || 0,
+            reviewsData.pending || 0,
+            reviewsData.hidden || 0
+        ],
+        chart: {
+            type: 'donut',
+            height: 350
+        },
+        labels: ['Approved', 'Pending', 'Hidden'],
+        colors: ['#00b894', '#fdcb6e', '#e17055'],
+        legend: {
+            position: 'bottom'
+        },
+        plotOptions: {
+            pie: {
+                donut: {
+                    size: '65%'
+                }
+            }
+        }
+    };
+
+    const reviewsChart = new ApexCharts(document.querySelector("#reviewsStatusChart"), reviewsStatusChart);
+    reviewsChart.render();
+});
+</script>
 
 @endsection

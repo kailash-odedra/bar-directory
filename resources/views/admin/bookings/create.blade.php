@@ -19,7 +19,7 @@
       </div>
       @endif
 
-      <form action="{{ isset($booking) ? route('admin.bookings.update', $booking->id) : route('admin.bookings.store') }}" method="POST">
+      <form action="{{ isset($booking) ? route('admin.bookings.update', $booking) : route('admin.bookings.store') }}" method="POST">
         @csrf
         @if(isset($booking)) @method('PUT') @endif
 
@@ -99,7 +99,10 @@
 
         </div>
 
-        <button type="submit" class="btn btn-primary">{{ isset($booking) ? 'Update' : 'Create' }}</button>
+        <div class="mt-3">
+            <button type="submit" class="btn btn-primary">{{ isset($booking) ? 'Update' : 'Create' }}</button>
+            <a href="{{ route('admin.bookings.index') }}" class="btn btn-secondary ms-2">Cancel</a>
+        </div>
       </form>
 
     </div>

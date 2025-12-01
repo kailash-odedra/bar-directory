@@ -90,11 +90,10 @@ class BarMenuCategoryController extends Controller
             ->with('success', 'Menu Category updated successfully.');
     }
 
-    public function toggleStatus($id)
+    public function toggleStatus(BarMenuCategory $barMenuCategory)
     {
-        $category = BarMenuCategory::findOrFail($id);
-        $category->status = $category->status == 1 ? 2 : 1;
-        $category->save();
+        $barMenuCategory->status = $barMenuCategory->status == 1 ? 2 : 1;
+        $barMenuCategory->save();
 
         return response()->json([
             'success' => true,

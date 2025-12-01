@@ -1,16 +1,28 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\Admin\BarController;
 use App\Http\Controllers\Admin\BarTagController;
 use App\Http\Controllers\Admin\BarMenuCategoryController;
 use App\Http\Controllers\Admin\BarMenuItemController;
 use App\Http\Controllers\Admin\BarImageController;
 use App\Http\Controllers\Admin\BarReviewController;
+use App\Http\Controllers\Admin\CityController;
 use App\Http\Controllers\Admin\ClaimController;
+use App\Http\Controllers\Admin\CountryController;
 use App\Http\Controllers\Admin\EventController;
 use App\Http\Controllers\Admin\LocationController;
 use App\Http\Controllers\Admin\BookingController;
+use App\Http\Controllers\Admin\RegionController;
+use App\Http\Controllers\Admin\StateController;
+use App\Http\Controllers\Admin\SectionController;
+use App\Http\Controllers\Admin\UserController;
+use App\Http\Controllers\Admin\RoleController;
+use App\Http\Controllers\Admin\PermissionController;
+use App\Http\Controllers\Admin\DashboardController;
+use App\Http\Controllers\Admin\AuthController;
+use App\Http\Controllers\Admin\ProfileController;
 
 /**
  * =======================
@@ -18,55 +30,89 @@ use App\Http\Controllers\Admin\BookingController;
  * =======================
  */
 Route::get('/', function () {
-    return redirect(getRouterValue() . 'dashboard/analytics');
+    if (Auth::check()) {
+        return redirect(getRouterValue() . 'dashboard/analytics');
+    }
+    return redirect()->route('admin.login');
 });
 
 /**
  * =======================
- *          Dashboard
+ *          Authentication (Public)
  * =======================
  */
-Route::prefix('admin')->as('admin.')->group(function () {
+Route::get('admin/login', [AuthController::class, 'showLoginForm'])->name('admin.login')->middleware('guest');
+Route::post('admin/login', [AuthController::class, 'login'])->name('admin.login.post');
+Route::post('admin/logout', [AuthController::class, 'logout'])->name('admin.logout')->middleware('auth');
+
+/**
+ * =======================
+ *          Dashboard (Protected)
+ * =======================
+ */
+Route::prefix('admin')->as('admin.')->middleware('auth')->group(function () {
+    
+    // Profile Routes
+    Route::get('profile', [ProfileController::class, 'show'])->name('profile.show');
+    Route::put('profile', [ProfileController::class, 'update'])->name('profile.update');
 
     Route::resource('bar', BarController::class);
-    Route::post('bar/{id}/toggle-status', [BarController::class, 'toggleStatus'])->name('bar.toggleStatus');
-    Route::get('bar/{id}/approve', [BarController::class, 'approve'])->name('bar.approve');
+    Route::post('bar/{bar}/toggle-status', [BarController::class, 'toggleStatus'])->name('bar.toggleStatus');
+    Route::post('bar/{bar}/toggle-featured', [BarController::class, 'toggleFeatured'])->name('bar.toggleFeatured');
+    Route::get('bar/{bar}/approve', [BarController::class, 'approve'])->name('bar.approve');
+    Route::get('bars/pending-approval', [BarController::class, 'pendingApproval'])->name('bar.pendingApproval');
+    Route::post('bars/bulk-approve', [BarController::class, 'bulkApprove'])->name('bar.bulkApprove');
     Route::get('get-states/{country}', [LocationController::class, 'states'])
         ->name('location.states');
     Route::resource('claims', ClaimController::class)->only(['index','show','destroy']);
-    Route::post('claims/{id}/approve', [ClaimController::class,'approve'])->name('claims.approve');
-    Route::post('claims/{id}/reject', [ClaimController::class,'reject'])->name('claims.reject');
+    Route::post('claims/{claim}/approve', [ClaimController::class,'approve'])->name('claims.approve');
+    Route::post('claims/{claim}/reject', [ClaimController::class,'reject'])->name('claims.reject');
+    Route::post('claims/{claim}/request-more-info', [ClaimController::class,'requestMoreInfo'])->name('claims.requestMoreInfo');
+    Route::post('claims/{claim}/add-notes', [ClaimController::class,'addNotes'])->name('claims.addNotes');
+    Route::post('claims/{claim}/attach-documents', [ClaimController::class,'attachDocuments'])->name('claims.attachDocuments');
     Route::resource('bar-tags', BarTagController::class);
-    Route::post('bar-tags/{id}/toggle-status', [BarTagController::class, 'toggleStatus'])->name('bar-tags.toggleStatus');
+    Route::post('bar-tags/{barTag}/toggle-status', [BarTagController::class, 'toggleStatus'])->name('bar-tags.toggleStatus');
     Route::resource('events', EventController::class);
-    Route::post('events/{id}/toggle-status', [EventController::class, 'toggleStatus'])->name('events.toggleStatus');
+    Route::post('events/{event}/toggle-status', [EventController::class, 'toggleStatus'])->name('events.toggleStatus');
     Route::resource('bar-menu-categories', BarMenuCategoryController::class);
-    Route::post('bar-menu-categories/{id}/toggle-status', [BarMenuCategoryController::class, 'toggleStatus'])->name('bar-menu-categories.toggleStatus');
+    Route::post('bar-menu-categories/{barMenuCategory}/toggle-status', [BarMenuCategoryController::class, 'toggleStatus'])->name('bar-menu-categories.toggleStatus');
     Route::resource('bar-menu-items', BarMenuItemController::class);
-    Route::post('bar-menu-items/{id}/toggle-status', [BarMenuItemController::class, 'toggleStatus'])->name('bar-menu-categories.toggleStatus');
+    Route::post('bar-menu-items/{barMenuItem}/toggle-status', [BarMenuItemController::class, 'toggleStatus'])->name('bar-menu-items.toggleStatus');
     Route::resource('bar-images', BarImageController::class);
     Route::resource('bar-reviews', BarReviewController::class);
-    Route::post('bar-reviews/{id}/approve', [BarReviewController::class, 'approve']);
-    Route::post('bar-reviews/{id}/hide', [BarReviewController::class, 'hide']);
+    Route::post('bar-reviews/{barReview}/approve', [BarReviewController::class, 'approve'])->name('bar-reviews.approve');
+    Route::post('bar-reviews/{barReview}/hide', [BarReviewController::class, 'hide'])->name('bar-reviews.hide');
     Route::resource('bookings', BookingController::class);
-    Route::post('bookings/{id}/toggle-status', [BookingController::class,'toggleStatus'])
+    Route::post('bookings/{booking}/toggle-status', [BookingController::class,'toggleStatus'])
     ->name('admin.bookings.toggleStatus');
+
+    Route::resource('countries', CountryController::class)->except(['show']);
+    Route::post('countries/{country}/toggle-status', [CountryController::class, 'toggleStatus'])->name('countries.toggleStatus');
+    Route::resource('states', StateController::class)->except(['show']);
+    Route::post('states/{state}/toggle-status', [StateController::class, 'toggleStatus'])->name('states.toggleStatus');
+    Route::resource('cities', CityController::class)->except(['show']);
+    Route::post('cities/{city}/toggle-status', [CityController::class, 'toggleStatus'])->name('cities.toggleStatus');
+    Route::resource('regions', RegionController::class)->except(['show']);
+    Route::post('regions/{region}/toggle-status', [RegionController::class, 'toggleStatus'])->name('regions.toggleStatus');
+    
+    Route::resource('sections', SectionController::class)->except(['show']);
+    Route::post('sections/{section}/toggle-status', [SectionController::class, 'toggleStatus'])->name('sections.toggleStatus');
+    
+    Route::resource('users', UserController::class)->except(['show']);
+    Route::resource('roles', RoleController::class)->except(['show']);
+    Route::post('roles/{role}/toggle-status', [RoleController::class, 'toggleStatus'])->name('roles.toggleStatus');
+    Route::resource('permissions', PermissionController::class)->except(['show']);
 });
 
 
 
-Route::prefix('dashboard')->group(function () {
-    Route::get('/analytics', function () {
-        return view('admin/dashboard/analytics',
-            [
-                'catName' => 'dashboard',
-                'title' => 'CORK Admin - Multipurpose Bootstrap Dashboard Template',
-                "breadcrumbs" => ["Dashboard", "Analytics"],
-                'scrollspy' => 0,
-                'simplePage' => 0
-            ]
-        );
-    })->name('analytics');
+// Public Claim Routes (using Admin controller but public access)
+Route::get('claim-bar/{barId?}', [\App\Http\Controllers\Admin\ClaimController::class, 'createPublic'])->name('claims.create');
+Route::post('claim-bar', [\App\Http\Controllers\Admin\ClaimController::class, 'storePublic'])->name('claims.store');
+Route::get('claim-success/{claimRequestId}', [\App\Http\Controllers\Admin\ClaimController::class, 'successPublic'])->name('claims.success');
+
+Route::prefix('dashboard')->middleware('auth')->group(function () {
+    Route::get('/analytics', [DashboardController::class, 'analytics'])->name('analytics');
     
     Route::get('/sales', function () {
         return view('admin/dashboard/sales',

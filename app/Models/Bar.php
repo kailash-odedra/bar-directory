@@ -2,18 +2,19 @@
 
 namespace App\Models;
 
+use App\Traits\HasEncryptedRouteKey;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Str;
 
 class Bar extends Model
 {
-    use HasFactory;
+    use HasFactory, HasEncryptedRouteKey;
 
     protected $fillable = [
         'name','slug','short_description','full_description','logo','cover_image',
         'claimed','claimed_by','verified','meta_title','meta_description','meta_keywords',
-        'facebook','instagram','tiktok','youtube','website','status'
+        'facebook','instagram','tiktok','youtube','website','status','is_featured'
     ];
 
     // Auto-generate slug on creating if not provided
@@ -46,6 +47,17 @@ class Bar extends Model
     {
         return $this->belongsTo(State::class);
     }
+
+    public function claimedBy()
+    {
+        return $this->belongsTo(User::class, 'claimed_by');
+    }
+
+    public function owner()
+    {
+        return $this->claimedBy();
+    }
+
     public function isActive() {
         return $this->status == 1;
     }

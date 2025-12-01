@@ -48,21 +48,19 @@ class BarReviewController extends Controller
     }
 
     // AJAX Approve
-    public function approve($id)
+    public function approve(BarReview $barReview)
     {
-        $review = BarReview::findOrFail($id);
-        $review->status = 'approved';
-        $review->save();
+        $barReview->status = 'approved';
+        $barReview->save();
 
         return response()->json(['success' => true]);
     }
 
     // AJAX Hide
-    public function hide($id)
+    public function hide(BarReview $barReview)
     {
-        $review = BarReview::findOrFail($id);
-        $review->status = 'hidden';
-        $review->save();
+        $barReview->status = 'hidden';
+        $barReview->save();
 
         return response()->json(['success' => true]);
     }

@@ -77,9 +77,8 @@ class BarTagController extends Controller
 
         return redirect()->route('admin.bar-tags.index')->with('success', 'Tag updated successfully.');
     }
-    public function toggleStatus($id)
+    public function toggleStatus(BarTag $barTag)
     {
-        $barTag = BarTag::findOrFail($id);
         $barTag->status = $barTag->status == 1 ? 2 : 1;
         $barTag->save();
         return response()->json([

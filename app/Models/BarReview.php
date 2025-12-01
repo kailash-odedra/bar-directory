@@ -2,9 +2,11 @@
 
 namespace App\Models;
 
+use App\Traits\HasEncryptedRouteKey;
 use Illuminate\Database\Eloquent\Model;
 class BarReview extends Model
 {
+    use HasEncryptedRouteKey;
     protected $fillable = [
         'bar_id',
         'user_id',

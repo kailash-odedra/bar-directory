@@ -74,7 +74,8 @@
        Request::routeIs('boxedSignUp') ||
        Request::routeIs('boxedLockscreen') ||
        Request::routeIs('boxedPasswordReset') ||
-       Request::routeIs('boxed2sv')
+       Request::routeIs('boxed2sv') ||
+       Request::routeIs('admin.login')
        ? 'form' : '' }}
 
     {{ Request::routeIs('coverSignIn') ||

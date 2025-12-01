@@ -43,8 +43,8 @@
                                     </button>
                                 </td>
                                 <td>
-                                    <a href="{{ route('admin.bar-tags.edit', $tag->id) }}" class="btn btn-sm btn-primary">Edit</a>
-                                    <form action="{{ route('admin.bar-tags.destroy', $tag->id) }}" method="POST" class="d-inline">
+                                    <a href="{{ route('admin.bar-tags.edit', $tag) }}" class="btn btn-sm btn-primary">Edit</a>
+                                    <form action="{{ route('admin.bar-tags.destroy', $tag) }}" method="POST" class="d-inline">
                                         @csrf
                                         @method('DELETE')
                                         <button class="btn btn-sm btn-danger" onclick="return confirm('Delete this tag?')">Delete</button>

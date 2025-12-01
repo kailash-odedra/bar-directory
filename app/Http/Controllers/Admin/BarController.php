@@ -17,11 +17,33 @@ use Intervention\Image\Facades\Image;
 
 class BarController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $bars = Bar::with(['location.country','location.state','tags'])->paginate(20);
+        $status = $request->get('status');
+        $featured = $request->get('featured');
+        $claimed = $request->get('claimed');
+        
+        $bars = Bar::with(['location.country','location.state','tags','claimedBy'])
+            ->when($status, fn($q) => $q->where('status', $status))
+            ->when($featured !== null, fn($q) => $q->where('is_featured', $featured))
+            ->when($claimed !== null, fn($q) => $q->where('claimed', $claimed))
+            ->orderBy('created_at', 'desc')
+            ->paginate(20)
+            ->withQueryString();
+            
         return view('admin.bars.index', compact('bars'))
             ->with(['title'=>'Bars List','catName'=>'bar','scrollspy'=>false,'simplePage'=>false]);
+    }
+
+    public function pendingApproval()
+    {
+        $bars = Bar::with(['location.country','location.state','tags'])
+            ->whereIn('status', [0, 2]) // Status 0 or 2 = pending approval
+            ->orderBy('created_at', 'desc')
+            ->paginate(20);
+            
+        return view('admin.bars.pending-approval', compact('bars'))
+            ->with(['title'=>'Pending Bar Approvals','catName'=>'bar','scrollspy'=>false,'simplePage'=>false]);
     }
 
     public function create()
@@ -60,9 +82,10 @@ class BarController extends Controller
         $data = $request->only([
             'name','slug','short_description','full_description','video_url',
             'meta_title','meta_description','meta_keywords',
-            'facebook','instagram','tiktok','youtube','website'
+            'facebook','instagram','tiktok','youtube','website','is_featured'
         ]);
         $data['status'] = 1;
+        $data['is_featured'] = $request->has('is_featured') ? 1 : 0;
         $data['slug'] = $data['slug'] ?: Str::slug($request->name.'-'.uniqid());
 
         if ($request->hasFile('logo')) {
@@ -92,9 +115,9 @@ class BarController extends Controller
         return redirect()->route('admin.bar.index')->with('success', 'Bar created successfully');
     }
 
-    public function edit($id)
+    public function edit(Bar $bar)
     {
-        $bar = Bar::with(['location','tags','timings','images'])->findOrFail($id);
+        $bar->load(['location','tags','timings','images']);
         $countries = Country::all();
         $states = State::all();
         $tags = BarTag::all();
@@ -104,7 +127,6 @@ class BarController extends Controller
 
     public function update(Request $request, Bar $bar)
     {
-        // Validation
         $request->validate([
             'name' => 'required|string|max:255',
             'slug' => 'nullable|string|max:255|unique:bars,slug,'.$bar->id,
@@ -129,8 +151,9 @@ class BarController extends Controller
         $data = $request->only([
             'name','slug','short_description','full_description','video_url',
             'meta_title','meta_description','meta_keywords',
-            'facebook','instagram','tiktok','youtube','website'
+            'facebook','instagram','tiktok','youtube','website','is_featured'
         ]);
+        $data['is_featured'] = $request->has('is_featured') ? 1 : 0;
 
         if ($request->hasFile('logo')) {
             if ($bar->logo) Storage::disk('public')->delete($bar->logo);
@@ -177,9 +200,8 @@ class BarController extends Controller
     }
 
     // Toggle status
-    public function toggleStatus($id)
+    public function toggleStatus(Bar $bar)
     {
-        $bar = Bar::findOrFail($id);
         $bar->status = $bar->status == 1 ? 2 : 1;
         $bar->save();
         return response()->json([
@@ -188,13 +210,39 @@ class BarController extends Controller
         ]);
     }
 
-    // Approve bar (admin action)
-    public function approve($id)
+    // Toggle featured status
+    public function toggleFeatured(Bar $bar)
     {
-        $bar = Bar::findOrFail($id);
+        $bar->is_featured = $bar->is_featured ? 0 : 1;
+        $bar->save();
+        return response()->json([
+            'success' => true,
+            'is_featured' => $bar->is_featured
+        ]);
+    }
+
+    // Approve bar (admin action)
+    public function approve(Bar $bar)
+    {
         $bar->status = 1; // Active
         $bar->save();
         return redirect()->back()->with('success','Bar approved successfully');
+    }
+
+    // Bulk approve bars
+    public function bulkApprove(Request $request)
+    {
+        $request->validate([
+            'bar_ids' => 'required|array',
+            'bar_ids.*' => 'exists:bars,id'
+        ]);
+
+        Bar::whereIn('id', $request->bar_ids)->update(['status' => 1]);
+        
+        return response()->json([
+            'success' => true,
+            'message' => count($request->bar_ids) . ' bars approved successfully'
+        ]);
     }
 
     protected function saveLocation(Bar $bar, Request $r)

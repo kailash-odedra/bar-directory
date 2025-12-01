@@ -103,9 +103,8 @@ class EventController extends Controller
 
         return redirect()->route('admin.events.index')->with('success', 'Event updated successfully.');
     }
-    public function toggleStatus($id)
+    public function toggleStatus(Event $event)
     {
-        $event = Event::findOrFail($id);
         $event->status = $event->status == 1 ? 2 : 1;
         $event->save();
         return response()->json([

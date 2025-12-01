@@ -70,12 +70,12 @@
                             </td>
 
                             <td>
-                                <a href="{{ route('admin.bar-menu-items.edit', $item->id) }}" 
+                                <a href="{{ route('admin.bar-menu-items.edit', $item) }}" 
                                    class="btn btn-info btn-sm">
                                     Edit
                                 </a>
 
-                                <form action="{{ route('admin.bar-menu-items.destroy', $item->id) }}" 
+                                <form action="{{ route('admin.bar-menu-items.destroy', $item) }}" 
                                       method="POST" 
                                       style="display:inline-block;">
                                     @csrf @method('DELETE')

@@ -30,6 +30,7 @@
                             <th>Tags</th>
                             <th>Rating</th>
                             <th>Status</th>
+                            <th>Featured</th>
                             <th>Claimed</th>
                             <th>Actions</th>
                         </tr>
@@ -48,15 +49,22 @@
                                 <td>
                                     <button type="button" 
                                         class="btn btn-sm toggle-status-btn {{ $bar->status == 1 ? 'btn-success' : 'btn-danger' }}" 
-                                        data-id="{{ $bar->id }}">
+                                        data-id="{{ $bar->getRouteKey() }}">
                                         {{ $bar->status == 1 ? 'Active' : 'Inactive' }}
+                                    </button>
+                                </td>
+                                <td>
+                                    <button type="button" 
+                                        class="btn btn-sm toggle-featured-btn {{ $bar->is_featured ? 'btn-warning' : 'btn-secondary' }}" 
+                                        data-id="{{ $bar->getRouteKey() }}">
+                                        {{ $bar->is_featured ? '⭐ Featured' : 'Not Featured' }}
                                     </button>
                                 </td>
                                 <td>{{ $bar->claimed ? 'Yes' : 'No' }}</td>
                                 <td>
-                                    <a href="{{ route('admin.bar.edit', $bar->id) }}" class="btn btn-sm btn-primary">Edit</a>
+                                    <a href="{{ route('admin.bar.edit', $bar) }}" class="btn btn-sm btn-primary">Edit</a>
 
-                                    <form action="{{ route('admin.bar.destroy', $bar->id) }}" method="POST" class="d-inline">
+                                    <form action="{{ route('admin.bar.destroy', $bar) }}" method="POST" class="d-inline">
                                         @csrf
                                         @method('DELETE')
                                         <button class="btn btn-sm btn-danger" onclick="return confirm('Delete this bar?')">Delete</button>
@@ -88,8 +96,9 @@
 @endsection
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    const buttons = document.querySelectorAll('.toggle-status-btn');
-    buttons.forEach(button => {
+    // Toggle Status
+    const statusButtons = document.querySelectorAll('.toggle-status-btn');
+    statusButtons.forEach(button => {
         button.addEventListener('click', function() {
             const barId = this.dataset.id;
             const btn = this;
@@ -113,6 +122,39 @@ document.addEventListener('DOMContentLoaded', function() {
                         btn.classList.remove('btn-success');
                         btn.classList.add('btn-danger');
                         btn.textContent = 'Inactive';
+                    }
+                }
+            })
+            .catch(err => console.error('Error:', err));
+        });
+    });
+
+    // Toggle Featured
+    const featuredButtons = document.querySelectorAll('.toggle-featured-btn');
+    featuredButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            const barId = this.dataset.id;
+            const btn = this;
+            fetch(`/admin/bar/${barId}/toggle-featured`, {
+                method: 'POST',
+                headers: {
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({})
+            })
+            .then(response => response.json())
+            .then(data => {
+                if(data.success){
+                    if(data.is_featured == 1){
+                        btn.classList.remove('btn-secondary');
+                        btn.classList.add('btn-warning');
+                        btn.textContent = '⭐ Featured';
+                    } else {
+                        btn.classList.remove('btn-warning');
+                        btn.classList.add('btn-secondary');
+                        btn.textContent = 'Not Featured';
                     }
                 }
             })

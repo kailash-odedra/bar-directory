@@ -119,11 +119,10 @@ class BarMenuItemController extends Controller
             ->with('success', 'Menu Item updated successfully.');
     }
 
-    public function toggleStatus($id)
+    public function toggleStatus(BarMenuItem $barMenuItem)
     {
-        $item = BarMenuItem::findOrFail($id);
-        $item->status = $item->status == 1 ? 0 : 1;
-        $item->save();
+        $barMenuItem->status = $barMenuItem->status == 1 ? 0 : 1;
+        $barMenuItem->save();
 
         return response()->json([
             'success' => true,

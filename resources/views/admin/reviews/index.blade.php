@@ -59,13 +59,13 @@
                                 @endif
                             </td>
                             <td>
-                                <button class="btn btn-success btn-sm approve-btn" data-id="{{ $review->id }}">
+                                <button class="btn btn-success btn-sm approve-btn" data-route-key="{{ $review->getRouteKey() }}">
                                     Approve
                                 </button>
-                                <button class="btn btn-warning btn-sm hide-btn" data-id="{{ $review->id }}">
+                                <button class="btn btn-warning btn-sm hide-btn" data-route-key="{{ $review->getRouteKey() }}">
                                     Hide
                                 </button>
-                                <form action="{{ route('admin.bar-reviews.destroy', $review->id) }}"
+                                <form action="{{ route('admin.bar-reviews.destroy', $review) }}"
                                       method="POST"
                                       style="display:inline-block;">
                                     @csrf @method('DELETE')
@@ -102,9 +102,9 @@ document.addEventListener('DOMContentLoaded', function(){
 
     document.addEventListener('click', function(e){
         if(e.target.classList.contains('approve-btn')){
-            let id = e.target.dataset.id;
+            let routeKey = e.target.dataset.routeKey;
 
-            fetch(`/admin/bar-reviews/${id}/approve`, {
+            fetch(`/admin/bar-reviews/${routeKey}/approve`, {
                 method: "POST",
                 headers: {
                     'X-CSRF-TOKEN': '{{ csrf_token() }}',
@@ -122,9 +122,9 @@ document.addEventListener('DOMContentLoaded', function(){
 
         // HIDE REVIEW
         if(e.target.classList.contains('hide-btn')){
-            let id = e.target.dataset.id;
+            let routeKey = e.target.dataset.routeKey;
 
-            fetch(`/admin/bar-reviews/${id}/hide`, {
+            fetch(`/admin/bar-reviews/${routeKey}/hide`, {
                 method: "POST",
                 headers: {
                     'X-CSRF-TOKEN': '{{ csrf_token() }}',

@@ -18,7 +18,7 @@
             </div>
             @endif
 
-            <form action="{{ isset($barTag) ? route('admin.bar-tags.update', $barTag->id) : route('admin.bar-tags.store') }}" method="POST">
+            <form action="{{ isset($barTag) ? route('admin.bar-tags.update', $barTag) : route('admin.bar-tags.store') }}" method="POST">
                 @csrf
                 @if(isset($barTag)) @method('PUT') @endif
 
@@ -32,7 +32,10 @@
                     <input type="text" class="form-control" name="slug" value="{{ old('slug', $barTag->slug ?? '') }}">
                 </div>
 
-                <button type="submit" class="btn btn-primary">{{ isset($barTag) ? 'Update' : 'Create' }}</button>
+                <div class="mt-3">
+                    <button type="submit" class="btn btn-primary">{{ isset($barTag) ? 'Update' : 'Create' }}</button>
+                    <a href="{{ route('admin.bar-tags.index') }}" class="btn btn-secondary ms-2">Cancel</a>
+                </div>
             </form>
         </div>
     </div>

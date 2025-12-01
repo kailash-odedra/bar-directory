@@ -2,10 +2,12 @@
 
 namespace App\Models;
 
+use App\Traits\HasEncryptedRouteKey;
 use Illuminate\Database\Eloquent\Model;
 
 class BarMenuCategory extends Model
 {
+    use HasEncryptedRouteKey;
     protected $fillable = ['bar_id', 'name'];
 
     public function bar()

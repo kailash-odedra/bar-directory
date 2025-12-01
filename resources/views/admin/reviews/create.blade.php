@@ -32,7 +32,10 @@
                     <input type="text" class="form-control" name="slug" value="{{ old('slug', $barTag->slug ?? '') }}">
                 </div>
 
-                <button type="submit" class="btn btn-primary">{{ isset($barTag) ? 'Update' : 'Create' }}</button>
+                <div class="mt-3">
+                    <button type="submit" class="btn btn-primary">{{ isset($barTag) ? 'Update' : 'Create' }}</button>
+                    <a href="{{ route('admin.bar-reviews.index') }}" class="btn btn-secondary ms-2">Cancel</a>
+                </div>
             </form>
         </div>
     </div>

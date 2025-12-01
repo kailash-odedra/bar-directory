@@ -18,7 +18,7 @@
             </div>
             @endif
 
-            <form class="row g-3" action="{{ isset($event) ? route('admin.events.update', $event->id) : route('admin.events.store') }}" method="POST" enctype="multipart/form-data">
+            <form class="row g-3" action="{{ isset($event) ? route('admin.events.update', $event) : route('admin.events.store') }}" method="POST" enctype="multipart/form-data">
                 @csrf
                 @if(isset($event)) @method('PUT') @endif
                 <div class="col-md-6">
@@ -69,6 +69,7 @@
                 
                 <div class="col-12 mt-3">
                     <button type="submit" class="btn btn-primary">{{ isset($event) ? 'Update' : 'Create' }}</button>
+                    <a href="{{ route('admin.events.index') }}" class="btn btn-secondary ms-2">Cancel</a>
                 </div>
             </form>
         </div>

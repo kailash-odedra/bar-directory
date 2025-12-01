@@ -43,6 +43,17 @@ class BookingController extends Controller
             'simplePage' => false]);
     }
 
+    // show booking details
+    public function show(Booking $booking)
+    {
+        $booking->load(['bar.location', 'user']);
+        
+        return view('admin.bookings.show', [
+            'booking' => $booking,
+            'title' => 'Booking Details - #' . $booking->id,
+        ]);
+    }
+
     // show create form
     public function create()
     {
@@ -203,9 +214,8 @@ class BookingController extends Controller
     }
 
     // quick status change via AJAX
-    public function toggleStatus(Request $request, $id)
+    public function toggleStatus(Request $request, Booking $booking)
     {
-        $booking = Booking::findOrFail($id);
         $new = $request->get('status'); // expected: pending|confirmed|cancelled|completed
         if (! in_array($new, ['pending','confirmed','cancelled','completed'])) {
             return response()->json(['success'=>false,'message'=>'Invalid status'], 422);

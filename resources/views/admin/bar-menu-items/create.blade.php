@@ -20,7 +20,7 @@
 
             <form 
                 action="{{ isset($barMenuItem) 
-                    ? route('admin.bar-menu-items.update', $barMenuItem->id)
+                    ? route('admin.bar-menu-items.update', $barMenuItem)
                     : route('admin.bar-menu-items.store') }}"
                 method="POST" enctype="multipart/form-data"
                 class="mt-3">
@@ -90,9 +90,12 @@
 
                 </div>
 
-                <button type="submit" class="btn btn-primary">
-                    {{ isset($barMenuItem) ? 'Update' : 'Create' }}
-                </button>
+                <div class="mt-3">
+                    <button type="submit" class="btn btn-primary">
+                        {{ isset($barMenuItem) ? 'Update' : 'Create' }}
+                    </button>
+                    <a href="{{ route('admin.bar-menu-items.index') }}" class="btn btn-secondary ms-2">Cancel</a>
+                </div>
 
             </form>
 
