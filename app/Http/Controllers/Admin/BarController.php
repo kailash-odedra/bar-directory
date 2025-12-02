@@ -12,6 +12,7 @@ use App\Models\Location;
 use App\Models\BarTag;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Str;
 use Intervention\Image\Facades\Image;
 
@@ -23,7 +24,15 @@ class BarController extends Controller
         $featured = $request->get('featured');
         $claimed = $request->get('claimed');
         
-        $bars = Bar::with(['location.country','location.state','tags','claimedBy'])
+        // Optimize: Select only needed columns and limit relationship loading
+        $bars = Bar::select('bars.id', 'bars.name', 'bars.slug', 'bars.status', 'bars.is_featured', 'bars.claimed', 'bars.created_at', 'bars.updated_at')
+            ->with([
+                'location:id,bar_id,city,state_id,country_id',
+                'location.state:id,name',
+                'location.country:id,name',
+                'tags:id,name,slug',
+                'claimedBy:id,name'
+            ])
             ->when($status, fn($q) => $q->where('status', $status))
             ->when($featured !== null, fn($q) => $q->where('is_featured', $featured))
             ->when($claimed !== null, fn($q) => $q->where('claimed', $claimed))
@@ -37,7 +46,14 @@ class BarController extends Controller
 
     public function pendingApproval()
     {
-        $bars = Bar::with(['location.country','location.state','tags'])
+        // Optimize: Select only needed columns
+        $bars = Bar::select('bars.id', 'bars.name', 'bars.slug', 'bars.status', 'bars.created_at', 'bars.updated_at')
+            ->with([
+                'location:id,bar_id,city,state_id,country_id',
+                'location.state:id,name',
+                'location.country:id,name',
+                'tags:id,name,slug'
+            ])
             ->whereIn('status', [0, 2]) // Status 0 or 2 = pending approval
             ->orderBy('created_at', 'desc')
             ->paginate(20);
@@ -48,9 +64,10 @@ class BarController extends Controller
 
     public function create()
     {
-        $countries = Country::all();
-        $states = State::all();
-        $tags = BarTag::all();
+        // Cache static data that doesn't change often
+        $countries = Cache::remember('countries.all', 3600, fn() => Country::orderBy('name')->get());
+        $states = Cache::remember('states.all', 3600, fn() => State::with('country')->orderBy('name')->get());
+        $tags = Cache::remember('bar_tags.active', 1800, fn() => BarTag::where('status', 1)->orderBy('name')->get());
 
         return view('admin.bars.create', compact('countries','states','tags'))
             ->with(['title'=>'Create Bar','catName'=>'bar','scrollspy'=>false,'simplePage'=>false]);
@@ -97,6 +114,15 @@ class BarController extends Controller
         }
 
         $bar = Bar::create($data);
+        
+        // Clear dashboard cache when new bar is created
+        Cache::forget('dashboard.total_bars');
+        Cache::forget('dashboard.claimed_bars');
+        Cache::forget('dashboard.featured_bars');
+        Cache::forget('dashboard.bars_by_status');
+        Cache::forget('dashboard.top_rated_bars');
+        // Clear API caches
+        $this->clearApiCaches();
 
         if ($request->filled('tags')) {
             $bar->tags()->sync($request->tags);
@@ -118,9 +144,10 @@ class BarController extends Controller
     public function edit(Bar $bar)
     {
         $bar->load(['location','tags','timings','images']);
-        $countries = Country::all();
-        $states = State::all();
-        $tags = BarTag::all();
+        // Cache static data that doesn't change often
+        $countries = Cache::remember('countries.all', 3600, fn() => Country::orderBy('name')->get());
+        $states = Cache::remember('states.all', 3600, fn() => State::with('country')->orderBy('name')->get());
+        $tags = Cache::remember('bar_tags.active', 1800, fn() => BarTag::where('status', 1)->orderBy('name')->get());
         return view('admin.bars.create', compact('bar','countries','states','tags'))
             ->with(['title'=>'Edit Bar','catName'=>'bar','scrollspy'=>false,'simplePage'=>false]);
     }
@@ -166,6 +193,15 @@ class BarController extends Controller
         }
 
         $bar->update($data);
+        
+        // Clear dashboard cache when bar is updated
+        Cache::forget('dashboard.total_bars');
+        Cache::forget('dashboard.claimed_bars');
+        Cache::forget('dashboard.featured_bars');
+        Cache::forget('dashboard.bars_by_status');
+        Cache::forget('dashboard.top_rated_bars');
+        // Clear API caches
+        $this->clearApiCaches($bar->id);
 
         if ($request->has('tags')) {
             $bar->tags()->sync($request->tags);
@@ -196,6 +232,16 @@ class BarController extends Controller
         }
 
         $bar->delete();
+        
+        // Clear dashboard cache when bar is deleted
+        Cache::forget('dashboard.total_bars');
+        Cache::forget('dashboard.claimed_bars');
+        Cache::forget('dashboard.featured_bars');
+        Cache::forget('dashboard.bars_by_status');
+        Cache::forget('dashboard.top_rated_bars');
+        // Clear API caches
+        $this->clearApiCaches($bar->id);
+        
         return back()->with('success','Bar deleted');
     }
 
@@ -204,6 +250,11 @@ class BarController extends Controller
     {
         $bar->status = $bar->status == 1 ? 2 : 1;
         $bar->save();
+        
+        // Clear caches
+        Cache::forget('dashboard.bars_by_status');
+        $this->clearApiCaches($bar->id);
+        
         return response()->json([
             'success' => true,
             'status' => $bar->status
@@ -215,6 +266,11 @@ class BarController extends Controller
     {
         $bar->is_featured = $bar->is_featured ? 0 : 1;
         $bar->save();
+        
+        // Clear caches
+        Cache::forget('dashboard.featured_bars');
+        $this->clearApiCaches($bar->id);
+        
         return response()->json([
             'success' => true,
             'is_featured' => $bar->is_featured
@@ -226,6 +282,14 @@ class BarController extends Controller
     {
         $bar->status = 1; // Active
         $bar->save();
+        
+        // Clear dashboard cache when bar is approved
+        Cache::forget('dashboard.bars_by_status');
+        Cache::forget('dashboard.total_bars');
+        Cache::forget('dashboard.pending_claims');
+        // Clear API caches
+        $this->clearApiCaches($bar->id);
+        
         return redirect()->back()->with('success','Bar approved successfully');
     }
 
@@ -238,6 +302,9 @@ class BarController extends Controller
         ]);
 
         Bar::whereIn('id', $request->bar_ids)->update(['status' => 1]);
+        
+        // Clear dashboard cache when bars are bulk approved
+        Cache::forget('dashboard.bars_by_status');
         
         return response()->json([
             'success' => true,
@@ -289,6 +356,24 @@ class BarController extends Controller
         }
 
         return $path;
+    }
+
+    /**
+     * Clear API caches when bar data changes
+     */
+    protected function clearApiCaches($barId = null)
+    {
+        // Clear specific bar cache if ID provided
+        if ($barId) {
+            Cache::forget("api.bars.show.{$barId}");
+            // Clear review caches for this bar (clear first 10 pages)
+            for ($i = 1; $i <= 10; $i++) {
+                Cache::forget("api.bars.{$barId}.reviews.page.{$i}");
+            }
+        }
+        
+        // Note: List caches will expire naturally (5 min TTL)
+        // For immediate clearing, we'd need Redis or to track cache keys
     }
 
     public function getStates(Request $request)

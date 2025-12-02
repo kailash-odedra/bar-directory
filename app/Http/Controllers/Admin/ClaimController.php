@@ -87,7 +87,9 @@ class ClaimController extends Controller
         $q = $request->get('q');
         $status = $request->get('status');
 
-        $claims = Claim::with(['bar', 'user', 'verifiedBy'])
+        // Optimize: Select only needed columns
+        $claims = Claim::select('claims.id', 'claims.bar_id', 'claims.user_id', 'claims.full_name', 'claims.email_address', 'claims.claim_request_id', 'claims.verification_status', 'claims.verified_by', 'claims.created_at')
+            ->with(['bar:id,name', 'user:id,name', 'verifiedBy:id,name'])
             ->when($q, fn($query) =>
                 $query->where(function($queryInner) use ($q) {
                     $queryInner->whereHas('bar', fn($q2) => $q2->where('name', 'like', "%{$q}%"))

@@ -1,8 +1,10 @@
 import { defineConfig } from 'vite';
 import laravel from 'laravel-vite-plugin';
+import vue from '@vitejs/plugin-vue';
 
 export default defineConfig({
     plugins: [
+        vue(),
         laravel({
             input: [
 
@@ -408,6 +410,9 @@ export default defineConfig({
                 
                 // 'resources/css/app.css',
                 // 'resources/js/app.js'
+                
+                // Vue.js Frontend App
+                'resources/js/frontend/app.js',
             
             ],
             refresh: true,

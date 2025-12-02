@@ -34,7 +34,7 @@
                             <tr>
                                 <td>{{ $tag->name }}</td>
                                 <td>{{ $tag->slug }}</td>
-                                <td>{{ $tag->created_at->format('d M, Y') }}</td>
+                                <td>{{ formatDate($tag->created_at) }}</td>
                                 <td>
                                     <button type="button" 
                                         class="btn btn-sm toggle-status-btn {{ $tag->status == 1 ? 'btn-success' : 'btn-danger' }}" 

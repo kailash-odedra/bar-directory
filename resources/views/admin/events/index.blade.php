@@ -46,8 +46,8 @@
                                 @endif
                             </td>
                             <td><a href="{{ $event->ticket_link }}" target="_blank">Link</a></td>
-                            <td>{{ $event->start_time }}</td>
-                            <td>{{ $event->end_time }}</td>
+                            <td>{{ formatDate($event->start_time, true) }}</td>
+                            <td>{{ formatDate($event->end_time, true) }}</td>
                             <td>
                                     <button type="button" 
                                         class="btn btn-sm toggle-status-btn {{ $event->status == 1 ? 'btn-success' : 'btn-danger' }}" 

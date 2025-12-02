@@ -10,6 +10,7 @@ use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Validation\Rule;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Cache;
 use App\Mail\BookingStatusChanged; // mailable we'll create
 
 class BookingController extends Controller
@@ -22,7 +23,9 @@ class BookingController extends Controller
         $status = $request->get('status');
         $date = $request->get('date');
 
-        $bookings = Booking::with('bar','user')
+        // Optimize: Select only needed columns
+        $bookings = Booking::select('bookings.id', 'bookings.bar_id', 'bookings.user_id', 'bookings.customer_name', 'bookings.customer_phone', 'bookings.customer_email', 'bookings.booking_date', 'bookings.booking_time', 'bookings.status', 'bookings.created_at')
+            ->with(['bar:id,name', 'user:id,name'])
             ->when($q, fn($qry) => $qry->where(function($s) use ($q) {
                 $s->where('customer_name','like',"%{$q}%")
                   ->orWhere('customer_phone','like',"%{$q}%")
@@ -36,7 +39,8 @@ class BookingController extends Controller
             ->paginate(25)
             ->withQueryString();
 
-        $bars = Bar::orderBy('name')->get();
+        // Cache bars list for dropdown (changes infrequently)
+        $bars = Cache::remember('bars.for_dropdown', 1800, fn() => Bar::select('id', 'name')->orderBy('name')->get());
 
         return view('admin.bookings.index', compact('bookings','bars'))
             ->with(['title'=>'Bookings','catName'=>'bar','subCatName'=>'bookings','scrollspy' => false,
@@ -57,7 +61,7 @@ class BookingController extends Controller
     // show create form
     public function create()
     {
-        $bars = Bar::orderBy('name')->get();
+        $bars = Cache::remember('bars.for_dropdown', 1800, fn() => Bar::select('id', 'name')->orderBy('name')->get());
         return view('admin.bookings.create', compact('bars'))
             ->with(['title'=>'Create Booking','catName'=>'bar','subCatName'=>'bookings','scrollspy' => false,
             'simplePage' => false]);
@@ -132,7 +136,7 @@ class BookingController extends Controller
 
     public function edit(Booking $booking)
     {
-        $bars = Bar::orderBy('name')->get();
+        $bars = Cache::remember('bars.for_dropdown', 1800, fn() => Bar::select('id', 'name')->orderBy('name')->get());
         return view('admin.bookings.create', compact('booking','bars'))
             ->with([
                 'title' => 'Edit Booking',

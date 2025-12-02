@@ -55,7 +55,7 @@
                                     <span class="badge bg-secondary">{{ ucfirst($claim->status ?? 'Pending') }}</span>
                                 @endif
                             </td>
-                            <td>{{ $claim->created_at ? $claim->created_at->format('M d, Y') : 'N/A' }}</td>
+                            <td>{{ formatDate($claim->created_at) }}</td>
                             <td>
                                 <a href="{{ route('admin.claims.show', $claim) }}" class="btn btn-sm btn-primary">View</a>
                             </td>

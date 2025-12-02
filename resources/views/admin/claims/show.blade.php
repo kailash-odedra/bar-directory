@@ -47,7 +47,7 @@
                             </div>
                             <div class="col-md-6 mb-3">
                                 <strong>Submitted:</strong><br>
-                                {{ $claim->created_at ? $claim->created_at->format('F d, Y h:i A') : 'N/A' }}
+                                {{ formatDate($claim->created_at, true) }}
                             </div>
                         </div>
                     </div>
@@ -132,7 +132,7 @@
                         <div class="row">
                             <div class="col-md-6 mb-3">
                                 <strong>Verified At:</strong><br>
-                                {{ $claim->verified_at ? $claim->verified_at->format('F d, Y h:i A') : 'N/A' }}
+                                {{ formatDate($claim->verified_at, true) }}
                             </div>
                             <div class="col-md-6 mb-3">
                                 <strong>Verified By:</strong><br>

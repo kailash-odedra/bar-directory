@@ -10,6 +10,7 @@ use App\Models\Region;
 use App\Models\State;
 use App\Support\GeneratesSlugs;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 
 class RegionController extends Controller
 {
@@ -17,11 +18,24 @@ class RegionController extends Controller
 
     public function index(Request $request)
     {
-        $cities = City::with('state.country')->orderBy('name')->get();
-        $states = State::with('country')->orderBy('name')->get();
+        // Cache dropdown data (changes infrequently)
+        $cities = Cache::remember('cities.for_dropdown', 3600, function() {
+            return City::select('id', 'name', 'state_id')
+                ->with('state:id,name,country_id')
+                ->orderBy('name')
+                ->get();
+        });
+        
+        $states = Cache::remember('states.for_dropdown', 3600, function() {
+            return State::select('id', 'name', 'country_id')
+                ->with('country:id,name')
+                ->orderBy('name')
+                ->get();
+        });
 
-        $regions = Region::query()
-            ->with(['city.state.country'])
+        // Optimize: Select only needed columns
+        $regions = Region::select('regions.id', 'regions.name', 'regions.slug', 'regions.city_id', 'regions.is_active', 'regions.created_at')
+            ->with(['city:id,name,state_id', 'city.state:id,name,country_id', 'city.state.country:id,name'])
             ->when($request->filled('city_id'), fn ($query) => $query->where('city_id', $request->city_id))
             ->when($request->filled('state_id'), function ($query) use ($request) {
                 $query->whereHas('city', fn ($cityQuery) => $cityQuery->where('state_id', $request->state_id));

@@ -12,6 +12,11 @@ class Event extends Model
         'bar_id', 'title', 'description', 'start_time', 'end_time','image', 'ticket_link','status','type'
     ];
 
+    protected $casts = [
+        'start_time' => 'datetime',
+        'end_time' => 'datetime',
+    ];
+
     public function bar()
     {
         return $this->belongsTo(Bar::class);

@@ -9,6 +9,7 @@ use App\Models\Country;
 use App\Models\State;
 use App\Support\GeneratesSlugs;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 
 class StateController extends Controller
 {
@@ -18,8 +19,9 @@ class StateController extends Controller
     {
         $countries = Country::orderBy('name')->get();
 
-        $states = State::query()
-            ->with('country')
+        // Optimize: Select only needed columns
+        $states = State::select('states.id', 'states.name', 'states.slug', 'states.country_id', 'states.is_active', 'states.created_at')
+            ->with('country:id,name')
             ->when($request->filled('country_id'), fn ($query) => $query->where('country_id', $request->country_id))
             ->when($request->filled('search'), function ($query) use ($request) {
                 $query->where(function ($inner) use ($request) {

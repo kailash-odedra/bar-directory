@@ -8,6 +8,7 @@ use App\Models\Bar;
 use App\Models\BarMenuCategory;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Cache;
 
 class BarMenuItemController extends Controller
 {
@@ -35,8 +36,8 @@ class BarMenuItemController extends Controller
 
     public function create()
     {
-        $bars = Bar::orderBy('name')->get();
-        $categories = BarMenuCategory::orderBy('name')->get();
+        $bars = Cache::remember('bars.for_dropdown', 1800, fn() => Bar::select('id', 'name')->orderBy('name')->get());
+        $categories = Cache::remember('menu_categories.for_dropdown', 1800, fn() => BarMenuCategory::select('id', 'name', 'bar_id')->orderBy('name')->get());
 
         return view('admin.bar-menu-items.create', [
             'bars' => $bars,
@@ -77,8 +78,8 @@ class BarMenuItemController extends Controller
 
     public function edit(BarMenuItem $bar_menu_item)
     {
-        $bars = Bar::orderBy('name')->get();
-        $categories = BarMenuCategory::orderBy('name')->get();
+        $bars = Cache::remember('bars.for_dropdown', 1800, fn() => Bar::select('id', 'name')->orderBy('name')->get());
+        $categories = Cache::remember('menu_categories.for_dropdown', 1800, fn() => BarMenuCategory::select('id', 'name', 'bar_id')->orderBy('name')->get());
 
         return view('admin.bar-menu-items.create', [
             'barMenuItem' => $bar_menu_item,

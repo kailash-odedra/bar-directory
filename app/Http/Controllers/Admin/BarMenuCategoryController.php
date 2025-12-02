@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\BarMenuCategory;
 use App\Models\Bar;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 
 class BarMenuCategoryController extends Controller
 {
@@ -32,7 +33,7 @@ class BarMenuCategoryController extends Controller
 
     public function create()
     {
-        $bars = Bar::orderBy('name')->get();
+        $bars = Cache::remember('bars.for_dropdown', 1800, fn() => Bar::select('id', 'name')->orderBy('name')->get());
 
         return view('admin.menu-categories.create', [
             'bars' => $bars,
@@ -63,7 +64,7 @@ class BarMenuCategoryController extends Controller
 
     public function edit(BarMenuCategory $bar_menu_category)
     {
-        $bars = Bar::orderBy('name')->get();
+        $bars = Cache::remember('bars.for_dropdown', 1800, fn() => Bar::select('id', 'name')->orderBy('name')->get());
 
         return view('admin.menu-categories.create', [
             'menuCategory' => $bar_menu_category,

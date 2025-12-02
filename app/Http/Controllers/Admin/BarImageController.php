@@ -24,7 +24,7 @@ class BarImageController extends Controller
 
     public function create()
     {
-        $bars = Bar::orderBy('name')->get();
+        $bars = Cache::remember('bars.for_dropdown', 1800, fn() => Bar::select('id', 'name')->orderBy('name')->get());
         return view('admin.images.create', compact('bars'))->with('catName','bar');
     }
 
@@ -63,7 +63,7 @@ class BarImageController extends Controller
 
     public function edit(BarImage $barImage)
     {
-        $bars = Bar::orderBy('name')->get();
+        $bars = Cache::remember('bars.for_dropdown', 1800, fn() => Bar::select('id', 'name')->orderBy('name')->get());
         return view('admin.images.edit', compact('barImage','bars'))->with('catName','bar');
     }
 

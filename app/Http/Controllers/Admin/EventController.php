@@ -8,13 +8,16 @@ use App\Models\Bar;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Cache;
 
 class EventController extends Controller
 {
     public function index(Request $request)
     {
         $q = $request->get('q');
-        $events = Event::with('bar')
+        // Optimize: Select only needed columns
+        $events = Event::select('events.id', 'events.bar_id', 'events.title', 'events.type', 'events.start_time', 'events.end_time', 'events.status', 'events.created_at')
+            ->with('bar:id,name')
             ->when($q, fn($query) => $query->where('title', 'like', "%{$q}%"))
             ->orderBy('start_time', 'desc')
             ->paginate(20)
@@ -32,7 +35,7 @@ class EventController extends Controller
 
     public function create()
     {
-        $bars = Bar::orderBy('name')->get();
+        $bars = Cache::remember('bars.for_dropdown', 1800, fn() => Bar::select('id', 'name')->orderBy('name')->get());
         return view('admin.events.create', [
             'bars' => $bars,
             'title' => 'Add New Event',
@@ -67,7 +70,7 @@ class EventController extends Controller
 
     public function edit(Event $event)
     {
-        $bars = Bar::orderBy('name')->get();
+        $bars = Cache::remember('bars.for_dropdown', 1800, fn() => Bar::select('id', 'name')->orderBy('name')->get());
         return view('admin.events.create', [ // reuse create view
             'event' => $event,
             'bars' => $bars,

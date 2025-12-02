@@ -46,7 +46,7 @@
                                     <h5 class="mb-1">#{{ $booking->id }}</h5>
                                     <p class="text-muted mb-0">
                                         <i class="feather icon-calendar"></i> 
-                                        Created: {{ $booking->created_at ? $booking->created_at->format('M d, Y h:i A') : 'N/A' }}
+                                        Created: {{ formatDate($booking->created_at, true) }}
                                     </p>
                                 </div>
                             </div>
@@ -88,7 +88,7 @@
                                 <div class="info-box">
                                     <strong>Date:</strong><br>
                                     <span class="text-primary">
-                                        {{ $booking->booking_date ? $booking->booking_date->format('F d, Y') : 'N/A' }}
+                                        {{ formatDate($booking->booking_date) }}
                                     </span>
                                 </div>
                             </div>
@@ -176,7 +176,7 @@
                                 <div class="timeline-content">
                                     <h6>Booking Created</h6>
                                     <p class="text-muted mb-0">
-                                        {{ $booking->created_at ? $booking->created_at->format('F d, Y h:i A') : 'N/A' }}
+                                        {{ formatDate($booking->created_at, true) }}
                                         @if($booking->created_by_admin)
                                             <span class="badge bg-info ms-2">By Admin</span>
                                         @endif
@@ -188,7 +188,7 @@
                                 <div class="timeline-marker bg-warning"></div>
                                 <div class="timeline-content">
                                     <h6>Last Updated</h6>
-                                    <p class="text-muted mb-0">{{ $booking->updated_at->format('F d, Y h:i A') }}</p>
+                                    <p class="text-muted mb-0">{{ formatDate($booking->updated_at, true) }}</p>
                                 </div>
                             </div>
                             @endif

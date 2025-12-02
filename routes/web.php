@@ -26,15 +26,12 @@ use App\Http\Controllers\Admin\ProfileController;
 
 /**
  * =======================
- *          Redirect
+ *          Frontend Vue.js App
  * =======================
  */
 Route::get('/', function () {
-    if (Auth::check()) {
-        return redirect(getRouterValue() . 'dashboard/analytics');
-    }
-    return redirect()->route('admin.login');
-});
+    return view('frontend.app');
+})->name('frontend.home');
 
 /**
  * =======================
@@ -56,14 +53,21 @@ Route::prefix('admin')->as('admin.')->middleware('auth')->group(function () {
     Route::get('profile', [ProfileController::class, 'show'])->name('profile.show');
     Route::put('profile', [ProfileController::class, 'update'])->name('profile.update');
 
+    // Location helper routes (must come before resource routes)
+    // Using countryId/stateId/cityId instead of country/state/city to avoid route model binding conflict
+    Route::get('get-states/{countryId}', [LocationController::class, 'states'])
+        ->name('location.states');
+    Route::get('get-cities/{stateId}', [LocationController::class, 'cities'])
+        ->name('location.cities');
+    Route::get('get-regions/{cityId}', [LocationController::class, 'regions'])
+        ->name('location.regions');
+
     Route::resource('bar', BarController::class);
     Route::post('bar/{bar}/toggle-status', [BarController::class, 'toggleStatus'])->name('bar.toggleStatus');
     Route::post('bar/{bar}/toggle-featured', [BarController::class, 'toggleFeatured'])->name('bar.toggleFeatured');
     Route::get('bar/{bar}/approve', [BarController::class, 'approve'])->name('bar.approve');
     Route::get('bars/pending-approval', [BarController::class, 'pendingApproval'])->name('bar.pendingApproval');
     Route::post('bars/bulk-approve', [BarController::class, 'bulkApprove'])->name('bar.bulkApprove');
-    Route::get('get-states/{country}', [LocationController::class, 'states'])
-        ->name('location.states');
     Route::resource('claims', ClaimController::class)->only(['index','show','destroy']);
     Route::post('claims/{claim}/approve', [ClaimController::class,'approve'])->name('claims.approve');
     Route::post('claims/{claim}/reject', [ClaimController::class,'reject'])->name('claims.reject');
@@ -126,3 +130,12 @@ Route::prefix('dashboard')->middleware('auth')->group(function () {
         );
     })->name('sales');
 });
+
+/**
+ * =======================
+ *          Frontend Vue.js Routes (Catch-all - must be last)
+ * =======================
+ */
+Route::get('/{any}', function () {
+    return view('frontend.app');
+})->where('any', '^(?!admin|api|dashboard|claim-bar|claim-success).*');

@@ -15,7 +15,9 @@ class UserController extends Controller
     {
         $q = $request->get('q');
         
-        $users = User::with('roles')
+        // Optimize: Select only needed columns
+        $users = User::select('users.id', 'users.name', 'users.email', 'users.created_at', 'users.updated_at')
+            ->with('roles:id,name,slug')
             ->when($q, fn($query) => $query->where('name', 'like', "%{$q}%")
                 ->orWhere('email', 'like', "%{$q}%"))
             ->orderBy('created_at', 'desc')

@@ -57,7 +57,7 @@ use Illuminate\Support\Facades\Storage;
                                     <span class="text-muted">No roles</span>
                                 @endif
                             </td>
-                            <td>{{ $user->created_at ? $user->created_at->format('M d, Y') : 'N/A' }}</td>
+                            <td>{{ formatDate($user->created_at) }}</td>
                             <td>
                                 <a href="{{ route('admin.users.edit', $user) }}" class="btn btn-sm btn-primary">Edit</a>
                                 <form action="{{ route('admin.users.destroy', $user) }}" method="POST" class="d-inline">

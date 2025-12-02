@@ -12,7 +12,7 @@ window.addEventListener("load", function(){
             layout: {
                 name: layoutName,
                 toggle: true,
-                darkMode: true,
+                darkMode: true, // Dark mode as default
                 boxed: true,
                 logo: {
                     darkLogo: '../src/assets/img/logo.svg',

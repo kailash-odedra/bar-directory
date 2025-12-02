@@ -64,7 +64,7 @@
                                         <span class="badge bg-info">{{ $tag->name }}</span>
                                     @endforeach
                                 </td>
-                                <td>{{ $bar->created_at ? $bar->created_at->format('M d, Y') : 'N/A' }}</td>
+                                <td>{{ formatDate($bar->created_at) }}</td>
                                 <td>
                                     <a href="{{ route('admin.bar.edit', $bar) }}" class="btn btn-sm btn-info">Review</a>
                                     <button type="button" class="btn btn-sm btn-success approve-btn" data-route-key="{{ $bar->getRouteKey() }}">

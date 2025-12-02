@@ -1,18 +1,9 @@
 @extends('layouts.app')
 
 @section('styles')
-{{-- <link href="https://designreset.com/cork/html/src/plugins/src/apex/apexcharts.css" rel="stylesheet" type="text/css">
-<link href="https://designreset.com/cork/html/src/assets/css/light/dashboard/dash_1.css" rel="stylesheet" type="text/css" />
-<link href="https://designreset.com/cork/html/src/assets/css/dark/dashboard/dash_1.css" rel="stylesheet" type="text/css" /> --}}
-
-
-{{-- @vite(['resources/scss/light/assets/components/modal.scss']) --}}
 <link rel="stylesheet" href="{{asset('plugins/src/apex/apexcharts.css')}}">
 @vite(['resources/scss/light/assets/dashboard/dash_1.scss'])
 @vite(['resources/scss/dark/assets/dashboard/dash_1.scss'])
-{{-- <link href="../src/plugins/src/apex/apexcharts.css" rel="stylesheet" type="text/css">
-<link href="../src/assets/css/light/dashboard/dash_1.css" rel="stylesheet" type="text/css" />
-<link href="../src/assets/css/dark/dashboard/dash_1.css" rel="stylesheet" type="text/css" /> --}}
 <style>
     .widget-one_hybrid a {
         text-decoration: none !important;
@@ -25,6 +16,38 @@
     }
     .layout-spacing {
         margin-bottom: 20px;
+    }
+    .section-title {
+        font-size: 1.25rem;
+        font-weight: 600;
+        margin-bottom: 1rem;
+        color: var(--bs-heading-color);
+    }
+    .dashboard-section {
+        margin-top: 2rem;
+    }
+    .bar-card {
+        border-left: 3px solid #00b894;
+        padding-left: 1rem;
+        margin-bottom: 0.75rem;
+    }
+    .bar-card:hover {
+        background-color: rgba(0, 184, 148, 0.05);
+        transition: background-color 0.2s ease;
+    }
+    .city-item, .tag-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0.75rem;
+        margin-bottom: 0.5rem;
+        border-radius: 0.375rem;
+        background-color: var(--bs-body-bg);
+        border: 1px solid var(--bs-border-color);
+    }
+    .city-item:hover, .tag-item:hover {
+        background-color: rgba(0, 123, 255, 0.05);
+        transition: background-color 0.2s ease;
     }
 </style>
 @endsection
@@ -166,558 +189,187 @@
             </div>
         </a>
     </div>
-    
-    <div class="col-xl-4 col-lg-6 col-md-6 col-sm-12 col-12 layout-spacing">
-        <div class="widget widget-card-four">
-            <div class="widget-content">
-                <div class="w-header">
-                    <div class="w-info">
-                        <h6 class="value">Expenses</h6>
-                    </div>
-                    <div class="task-action">
-                        <div class="dropdown">
-                            <a class="dropdown-toggle" href="#" role="button" id="expenses" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-more-horizontal"><circle cx="12" cy="12" r="1"></circle><circle cx="19" cy="12" r="1"></circle><circle cx="5" cy="12" r="1"></circle></svg>
-                            </a>
 
-                            <div class="dropdown-menu left" aria-labelledby="expenses" style="will-change: transform;">
-                                <a class="dropdown-item" href="javascript:void(0);">This Week</a>
-                                <a class="dropdown-item" href="javascript:void(0);">Last Week</a>
-                                <a class="dropdown-item" href="javascript:void(0);">Last Month</a>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="w-content">
-
-                    <div class="w-info">
-                        <p class="value">$ 45,141 <span>this week</span> <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-trending-up"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"></polyline><polyline points="17 6 23 6 23 12"></polyline></svg></p>
-                    </div>
-                    
-                </div>
-
-                <div class="w-progress-stats">                                            
-                    <div class="progress">
-                        <div class="progress-bar bg-gradient-secondary" role="progressbar" style="width: 57%" aria-valuenow="57" aria-valuemin="0" aria-valuemax="100"></div>
-                    </div>
-
-                    <div class="">
-                        <div class="w-icon">
-                            <p>57%</p>
-                        </div>
-                    </div>
-                    
-                </div>
-            </div>
-        </div>
-    </div>
-    
-    <div class="col-xl-4 col-lg-6 col-md-6 col-sm-12 col-12 layout-spacing">
-        <div class="widget widget-card-five">
-            <div class="widget-content">
-                <div class="account-box">
-
-                    <div class="info-box">
-                        <div class="icon">
-                            <span>
-                                <img src="{{Vite::asset('resources/images/money-bag.png')}}" alt="money-bag">
-                            </span>
-                        </div>
-
-                        <div class="balance-info">
-                            <h6>Total Balance</h6>
-                            <p>$41,741.42</p>
-                        </div>
-                    </div>
-
-                    <div class="card-bottom-section">
-                        <div><span class="badge badge-light-success">+ 13.6% <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-trending-up"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"></polyline><polyline points="17 6 23 6 23 12"></polyline></svg></span></div>
-                        <a href="javascript:void(0);" class="">View Report</a>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div class="col-xl-9 col-lg-12 col-md-12 col-sm-12 col-12 layout-spacing">
+    <!-- Top Rated Bars Section -->
+    <div class="col-xl-6 col-lg-12 col-md-12 col-sm-12 col-12 layout-spacing dashboard-section">
         <div class="widget widget-chart-three">
             <div class="widget-heading">
-                <div class="">
-                    <h5 class="">Unique Visitors</h5>
+                <div class="d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-star me-2" style="color: #fdcb6e;">
+                            <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+                        </svg>
+                        Top Rated Bars (4+ Stars)
+                    </h5>
+                    <a href="{{ route('admin.bar.index') }}" class="text-primary small">View All</a>
                 </div>
-
-                <div class="task-action">
-                    <div class="dropdown ">
-                        <a class="dropdown-toggle" href="#" role="button" id="uniqueVisitors" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-more-horizontal"><circle cx="12" cy="12" r="1"></circle><circle cx="19" cy="12" r="1"></circle><circle cx="5" cy="12" r="1"></circle></svg>
-                        </a>
-
-                        <div class="dropdown-menu left" aria-labelledby="uniqueVisitors">
-                            <a class="dropdown-item" href="javascript:void(0);">View</a>
-                            <a class="dropdown-item" href="javascript:void(0);">Update</a>
-                            <a class="dropdown-item" href="javascript:void(0);">Download</a>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="widget-content">
-                <div id="uniqueVisits"></div>
-            </div>
-        </div>
-    </div>
-
-    <div class="col-xl-3 col-lg-6 col-md-6 col-sm-12 col-12 layout-spacing">
-        <div class="widget widget-activity-five">
-
-            <div class="widget-heading">
-                <h5 class="">Activity Log</h5>
-
-                <div class="task-action">
-                    <div class="dropdown">
-                        <a class="dropdown-toggle" href="#" role="button" id="activitylog" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-more-horizontal"><circle cx="12" cy="12" r="1"></circle><circle cx="19" cy="12" r="1"></circle><circle cx="5" cy="12" r="1"></circle></svg>
-                        </a>
-
-                        <div class="dropdown-menu left" aria-labelledby="activitylog" style="will-change: transform;">
-                            <a class="dropdown-item" href="javascript:void(0);">View All</a>
-                            <a class="dropdown-item" href="javascript:void(0);">Mark as Read</a>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="widget-content">
-
-                <div class="w-shadow-top"></div>
-
-                <div class="mt-container mx-auto">
-                    <div class="timeline-line">
-                        
-                        <div class="item-timeline timeline-new">
-                            <div class="t-dot">
-                                <div class="t-secondary"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-plus"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg></div>
-                            </div>
-                            <div class="t-content">
-                                <div class="t-uppercontent">
-                                    <h5>New project created : <a href="javscript:void(0);"><span>[Cork Admin]</span></a></h5>
-                                </div>
-                                <p>07 May, 2022</p>
-                            </div>
-                        </div>
-
-                        <div class="item-timeline timeline-new">
-                            <div class="t-dot">
-                                <div class="t-success"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-mail"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg></div>
-                            </div>
-                            <div class="t-content">
-                                <div class="t-uppercontent">
-                                    <h5>Mail sent to <a href="javascript:void(0);">HR</a> and <a href="javascript:void(0);">Admin</a></h5>
-                                </div>
-                                <p>06 May, 2022</p>
-                            </div>
-                        </div>
-
-                        <div class="item-timeline timeline-new">
-                            <div class="t-dot">
-                                <div class="t-primary"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-check"><polyline points="20 6 9 17 4 12"></polyline></svg></div>
-                            </div>
-                            <div class="t-content">
-                                <div class="t-uppercontent">
-                                    <h5>Server Logs Updated</h5>
-                                </div>
-                                <p>01 May, 2022</p>
-                            </div>
-                        </div>
-
-                        <div class="item-timeline timeline-new">
-                            <div class="t-dot">
-                                <div class="t-danger"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-check"><polyline points="20 6 9 17 4 12"></polyline></svg></div>
-                            </div>
-                            <div class="t-content">
-                                <div class="t-uppercontent">
-                                    <h5>Task Completed : <a href="javscript:void(0);"><span>[Backup Files EOD]</span></a></h5>
-                                </div>
-                                <p>30 Apr, 2022</p>
-                            </div>
-                        </div>
-
-                        <div class="item-timeline timeline-new">
-                            <div class="t-dot">
-                                <div class="t-warning"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-file"><path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"></path><polyline points="13 2 13 9 20 9"></polyline></svg></div>
-                            </div>
-                            <div class="t-content">
-                                <div class="t-uppercontent">
-                                    <h5>Documents Submitted from <a href="javascript:void(0);">Sara</a></h5>
-                                    <span class=""></span>
-                                </div>
-                                <p>25 Apr, 2022</p>
-                            </div>
-                        </div>
-
-                        <div class="item-timeline timeline-new">
-                            <div class="t-dot">
-                                <div class="t-dark"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-server"><rect x="2" y="2" width="20" height="8" rx="2" ry="2"></rect><rect x="2" y="14" width="20" height="8" rx="2" ry="2"></rect><line x1="6" y1="6" x2="6" y2="6"></line><line x1="6" y1="18" x2="6" y2="18"></line></svg></div>
-                            </div>
-                            <div class="t-content">
-                                <div class="t-uppercontent">
-                                    <h5>Server rebooted successfully</h5>
-                                    <span class=""></span>
-                                </div>
-                                <p>10 Apr, 2022</p>
-                            </div>
-                        </div>                                      
-                    </div>                                    
-                </div>
-
-                <div class="w-shadow-bottom"></div>
-            </div>
-        </div>
-    </div>
-
-    <div class="col-xl-4 col-lg-6 col-md-6 col-sm-12 col-12 layout-spacing">
-        <div class="widget-four">
-            <div class="widget-heading">
-                <h5 class="">Visitors by Browser</h5>
             </div>
             <div class="widget-content">
-                <div class="vistorsBrowser">
-                    <div class="browser-list">
-                        <div class="w-icon">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-chrome"><circle cx="12" cy="12" r="10"></circle><circle cx="12" cy="12" r="4"></circle><line x1="21.17" y1="8" x2="12" y2="8"></line><line x1="3.95" y1="6.06" x2="8.54" y2="14"></line><line x1="10.88" y1="21.94" x2="15.46" y2="14"></line></svg>
-                        </div>
-                        <div class="w-browser-details">
-                            <div class="w-browser-info">
-                                <h6>Chrome</h6>
-                                <p class="browser-count">65%</p>
-                            </div>
-                            <div class="w-browser-stats">
-                                <div class="progress">
-                                    <div class="progress-bar bg-gradient-primary" role="progressbar" style="width: 65%" aria-valuenow="90" aria-valuemin="0" aria-valuemax="100"></div>
-                                </div>
-                            </div>
-                        </div>
+                @if($topRatedBars->count() > 0)
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Bar Name</th>
+                                    <th>Location</th>
+                                    <th class="text-end">Rating</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach($topRatedBars->take(10) as $bar)
+                                <tr>
+                                    <td>
+                                        <a href="{{ route('admin.bar.edit', $bar) }}" class="text-decoration-none fw-semibold">
+                                            {{ $bar->name }}
+                                        </a>
+                                    </td>
+                                    <td>
+                                        <small class="text-muted">
+                                            {{ $bar->location->city ?? 'N/A' }}{{ $bar->location->state ? ', ' . $bar->location->state->name : '' }}
+                                        </small>
+                                    </td>
+                                    <td class="text-end">
+                                        <span class="badge bg-success">
+                                            {{ number_format($bar->avg_rating, 1) }} ⭐
+                                        </span>
+                                    </td>
+                                </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
                     </div>
-
-                    <div class="browser-list">
-                        <div class="w-icon">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-compass"><circle cx="12" cy="12" r="10"></circle><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"></polygon></svg>
-                        </div>
-                        <div class="w-browser-details">
-                            
-                            <div class="w-browser-info">
-                                <h6>Safari</h6>
-                                <p class="browser-count">25%</p>
-                            </div>
-
-                            <div class="w-browser-stats">
-                                <div class="progress">
-                                    <div class="progress-bar bg-gradient-danger" role="progressbar" style="width: 35%" aria-valuenow="65" aria-valuemin="0" aria-valuemax="100"></div>
-                                </div>
-                            </div>
-
-                        </div>
-
+                @else
+                    <div class="text-center py-5">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-star text-muted mb-3">
+                            <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+                        </svg>
+                        <p class="text-muted mb-0">No bars with 4+ star rating yet</p>
                     </div>
-
-                    <div class="browser-list">
-                        <div class="w-icon">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-globe"><circle cx="12" cy="12" r="10"></circle><line x1="2" y1="12" x2="22" y2="12"></line><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path></svg>
-                        </div>
-                        <div class="w-browser-details">
-                            
-                            <div class="w-browser-info">
-                                <h6>Others</h6>
-                                <p class="browser-count">15%</p>
-                            </div>
-
-                            <div class="w-browser-stats">
-                                <div class="progress">
-                                    <div class="progress-bar bg-gradient-warning" role="progressbar" style="width: 15%" aria-valuenow="15" aria-valuemin="0" aria-valuemax="100"></div>
-                                </div>
-                            </div>
-
-                        </div>
-
-                    </div>
-                    
-                </div>
-
+                @endif
             </div>
         </div>
     </div>
 
-    <div class="col-xl-8 col-lg-12 col-md-12 col-sm-12 col-12">
-        <div class="row widget-statistic">
-            <div class="col-xl-4 col-lg-4 col-md-4 col-sm-4 col-12 layout-spacing">
-                <div class="widget widget-one_hybrid widget-followers">
-                    <div class="widget-heading">
-                        <div class="w-title">
-                            <div class="w-icon">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-users"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
-                            </div>
-                            <div class="">
-                                <p class="w-value">31.6K</p>
-                                <h5 class="">Followers</h5>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="widget-content">    
-                        <div class="w-chart">
-                            <div id="hybrid_followers"></div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="col-xl-4 col-lg-4 col-md-4 col-sm-4 col-12 layout-spacing">
-                <div class="widget widget-one_hybrid widget-referral">
-                    <div class="widget-heading">
-                        <div class="w-title">
-                            <div class="w-icon">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-link"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg>
-                            </div>
-                            <div class="">
-                                <p class="w-value">1,900</p>
-                                <h5 class="">Referral</h5>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="widget-content">    
-                        <div class="w-chart">
-                            <div id="hybrid_followers1"></div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="col-xl-4 col-lg-4 col-md-4 col-sm-4 col-12 layout-spacing">
-                <div class="widget widget-one_hybrid widget-engagement">
-                    <div class="widget-heading">
-                        <div class="w-title">
-                            <div class="w-icon">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-message-circle"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path></svg>
-                            </div>
-                            <div class="">
-                                <p class="w-value">18.2%</p>
-                                <h5 class="">Engagement</h5>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="widget-content">    
-                        <div class="w-chart">
-                            <div id="hybrid_followers3"></div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div class="col-xl-4 col-lg-6 col-md-6 col-sm-12 col-12 layout-spacing">
-        <div class="widget widget-five">
-
-            <div class="widget-heading">
-
-                <a href="javascript:void(0)" class="task-info">
-
-                    <div class="usr-avatar">
-                        <span>FD</span>
-                    </div>
-
-                    <div class="w-title">
-
-                        <h5>Figma Design</h5>
-                        <span>Design Project</span>
-                        
-                    </div>
-
-                </a>
-
-                <div class="task-action">
-                    <div class="dropdown">
-                        <a class="dropdown-toggle" href="#" role="button" id="pendingTask" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-more-horizontal"><circle cx="12" cy="12" r="1"></circle><circle cx="19" cy="12" r="1"></circle><circle cx="5" cy="12" r="1"></circle></svg>
-                        </a>
-
-                        <div class="dropdown-menu left" aria-labelledby="pendingTask" style="will-change: transform;">
-                            <a class="dropdown-item" href="javascript:void(0);">View Project</a>
-                            <a class="dropdown-item" href="javascript:void(0);">Edit Project</a>
-                            <a class="dropdown-item" href="javascript:void(0);">Mark as Done</a>
-                        </div>
-                    </div>
-                </div>
-                
-            </div>
-            
-            
-            <div class="widget-content">
-
-                <p>Doloribus nisi vel suscipit modi, optio ex repudiandae voluptatibus officiis commodi.</p>
-
-                <div class="progress-data">
-
-                    <div class="progress-info">
-                        <div class="task-count"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-check-square"><polyline points="9 11 12 14 22 4"></polyline><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path></svg><p>5 Tasks</p></div>
-                        <div class="progress-stats"><p>86.2%</p></div>
-                    </div>
-                    
-                    <div class="progress">
-                        <div class="progress-bar bg-primary" role="progressbar" style="width: 65%" aria-valuenow="90" aria-valuemin="0" aria-valuemax="100"></div>
-                    </div>
-                    
-                </div>
-
-                <div class="meta-info">
-
-                    <div class="due-time">
-                        <p><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-clock"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg> 3 Days Left</p>
-                    </div>
-
-
-                    <div class="avatar--group">
-
-                        <div class="avatar translateY-axis more-group">
-                            <span class="avatar-title">+6</span>
-                        </div>
-                        <div class="avatar translateY-axis">
-                            <img alt="avatar" src="{{Vite::asset('resources/images/profile-8.jpeg')}}"/>
-                        </div>
-                        <div class="avatar translateY-axis">
-                            <img alt="avatar" src="{{Vite::asset('resources/images/profile-12.jpeg')}}"/>
-                        </div>
-                        <div class="avatar translateY-axis">
-                            <img alt="avatar" src="{{Vite::asset('resources/images/profile-19.jpeg')}}"/>
-                        </div>
-                        
-                    </div>
-
-                </div>
-                
-
-            </div>
-
-        </div>
-
-    </div>
-
-    {{-- Analytics Charts Section --}}
-    <div class="col-xl-6 col-lg-12 col-md-12 col-sm-12 col-12 layout-spacing">
+    <!-- Most Searched Cities Section -->
+    <div class="col-xl-6 col-lg-12 col-md-12 col-sm-12 col-12 layout-spacing dashboard-section">
         <div class="widget widget-chart-three">
             <div class="widget-heading">
-                <h5 class="">Top Rated Bars (4+ Stars)</h5>
+                <div class="d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-map-pin me-2" style="color: #00b894;">
+                            <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+                            <circle cx="12" cy="10" r="3"></circle>
+                        </svg>
+                        Most Searched Cities
+                    </h5>
+                </div>
             </div>
             <div class="widget-content">
-                <div class="table-responsive">
-                    <table class="table table-hover">
-                        <thead>
-                            <tr>
-                                <th>Bar Name</th>
-                                <th>Location</th>
-                                <th>Rating</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @forelse($topRatedBars as $bar)
-                            <tr>
-                                <td>
-                                    <a href="{{ route('admin.bar.edit', $bar) }}">{{ $bar->name }}</a>
-                                </td>
-                                <td>
-                                    {{ $bar->location->city ?? 'N/A' }}, {{ $bar->location->state->name ?? '' }}
-                                </td>
-                                <td>
-                                    <span class="badge bg-success">{{ number_format($bar->avg_rating, 1) }} ⭐</span>
-                                </td>
-                            </tr>
-                            @empty
-                            <tr>
-                                <td colspan="3" class="text-center">No bars with 4+ star rating yet</td>
-                            </tr>
-                            @endforelse
-                        </tbody>
-                    </table>
-                </div>
+                @if($mostSearchedCities->count() > 0)
+                    <div class="list-group list-group-flush">
+                        @foreach($mostSearchedCities->take(10) as $city)
+                        <div class="city-item">
+                            <div class="d-flex align-items-center">
+                                <span class="badge bg-primary rounded-pill me-3">{{ $loop->iteration }}</span>
+                                <strong>{{ $city->city }}</strong>
+                            </div>
+                            <span class="badge bg-info">{{ $city->bar_count }} {{ $city->bar_count == 1 ? 'bar' : 'bars' }}</span>
+                        </div>
+                        @endforeach
+                    </div>
+                @else
+                    <div class="text-center py-5">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-map-pin text-muted mb-3">
+                            <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+                            <circle cx="12" cy="10" r="3"></circle>
+                        </svg>
+                        <p class="text-muted mb-0">No city data available</p>
+                    </div>
+                @endif
             </div>
         </div>
     </div>
 
-    <div class="col-xl-6 col-lg-12 col-md-12 col-sm-12 col-12 layout-spacing">
+    <!-- Trending Tags / Categories Section -->
+    <div class="col-xl-6 col-lg-12 col-md-12 col-sm-12 col-12 layout-spacing dashboard-section">
         <div class="widget widget-chart-three">
             <div class="widget-heading">
-                <h5 class="">Most Searched Cities</h5>
+                <div class="d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-tag me-2" style="color: #6c5ce7;">
+                            <path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"></path>
+                            <line x1="7" y1="7" x2="7.01" y2="7"></line>
+                        </svg>
+                        Trending Tags / Categories
+                    </h5>
+                    <a href="{{ route('admin.bar-tags.index') }}" class="text-primary small">View All</a>
+                </div>
             </div>
             <div class="widget-content">
-                <div class="table-responsive">
-                    <table class="table table-hover">
-                        <thead>
-                            <tr>
-                                <th>City</th>
-                                <th>Number of Bars</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @forelse($mostSearchedCities as $city)
-                            <tr>
-                                <td><strong>{{ $city->city }}</strong></td>
-                                <td>
-                                    <span class="badge bg-info">{{ $city->bar_count }} bars</span>
-                                </td>
-                            </tr>
-                            @empty
-                            <tr>
-                                <td colspan="2" class="text-center">No city data available</td>
-                            </tr>
-                            @endforelse
-                        </tbody>
-                    </table>
-                </div>
+                @if($trendingTags->count() > 0)
+                    <div class="list-group list-group-flush">
+                        @foreach($trendingTags->take(10) as $tag)
+                        <div class="tag-item">
+                            <div class="d-flex align-items-center">
+                                <span class="badge bg-secondary me-3">{{ $tag->name }}</span>
+                            </div>
+                            <strong class="text-primary">{{ $tag->bars_count }} {{ $tag->bars_count == 1 ? 'bar' : 'bars' }}</strong>
+                        </div>
+                        @endforeach
+                    </div>
+                @else
+                    <div class="text-center py-5">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-tag text-muted mb-3">
+                            <path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"></path>
+                            <line x1="7" y1="7" x2="7.01" y2="7"></line>
+                        </svg>
+                        <p class="text-muted mb-0">No tags available</p>
+                    </div>
+                @endif
             </div>
         </div>
     </div>
 
-    <div class="col-xl-6 col-lg-12 col-md-12 col-sm-12 col-12 layout-spacing">
+    <!-- Reviews by Status Section -->
+    <div class="col-xl-6 col-lg-12 col-md-12 col-sm-12 col-12 layout-spacing dashboard-section">
         <div class="widget widget-chart-three">
             <div class="widget-heading">
-                <h5 class="">Trending Tags / Categories</h5>
-            </div>
-            <div class="widget-content">
-                <div class="table-responsive">
-                    <table class="table table-hover">
-                        <thead>
-                            <tr>
-                                <th>Tag Name</th>
-                                <th>Number of Bars</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @forelse($trendingTags as $tag)
-                            <tr>
-                                <td>
-                                    <span class="badge bg-secondary">{{ $tag->name }}</span>
-                                </td>
-                                <td>
-                                    <strong>{{ $tag->bars_count }} bars</strong>
-                                </td>
-                            </tr>
-                            @empty
-                            <tr>
-                                <td colspan="2" class="text-center">No tags available</td>
-                            </tr>
-                            @endforelse
-                        </tbody>
-                    </table>
+                <div class="d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-message-circle me-2" style="color: #e17055;">
+                            <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path>
+                        </svg>
+                        Reviews by Status
+                    </h5>
+                    <a href="{{ route('admin.bar-reviews.index') }}" class="text-primary small">View All</a>
                 </div>
             </div>
-        </div>
-    </div>
-
-    <div class="col-xl-6 col-lg-12 col-md-12 col-sm-12 col-12 layout-spacing">
-        <div class="widget widget-chart-three">
-            <div class="widget-heading">
-                <h5 class="">Reviews by Status</h5>
-            </div>
             <div class="widget-content">
-                <div id="reviewsStatusChart"></div>
+                <div id="reviewsStatusChart" style="min-height: 350px;"></div>
+                @if($reviewsByStatus->count() > 0)
+                    <div class="mt-4">
+                        <div class="row text-center">
+                            <div class="col-4">
+                                <div class="p-3 border rounded">
+                                    <div class="h4 mb-1 text-success">{{ $reviewsByStatus->get('approved', 0) }}</div>
+                                    <small class="text-muted">Approved</small>
+                                </div>
+                            </div>
+                            <div class="col-4">
+                                <div class="p-3 border rounded">
+                                    <div class="h4 mb-1 text-warning">{{ $reviewsByStatus->get('pending', 0) }}</div>
+                                    <small class="text-muted">Pending</small>
+                                </div>
+                            </div>
+                            <div class="col-4">
+                                <div class="p-3 border rounded">
+                                    <div class="h4 mb-1 text-danger">{{ $reviewsByStatus->get('hidden', 0) }}</div>
+                                    <small class="text-muted">Hidden</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                @endif
             </div>
         </div>
     </div>
@@ -726,7 +378,6 @@
 @endsection
 
 @section('scripts')
-
 <script src="{{asset('plugins/src/apex/apexcharts.min.js')}}"></script>
 @vite(['resources/js/dashboard/dash_1.js'])
 
@@ -743,17 +394,65 @@ document.addEventListener('DOMContentLoaded', function() {
         ],
         chart: {
             type: 'donut',
-            height: 350
+            height: 350,
+            toolbar: {
+                show: false
+            }
         },
         labels: ['Approved', 'Pending', 'Hidden'],
         colors: ['#00b894', '#fdcb6e', '#e17055'],
         legend: {
-            position: 'bottom'
+            position: 'bottom',
+            fontSize: '14px',
+            fontFamily: 'Nunito, sans-serif'
         },
         plotOptions: {
             pie: {
                 donut: {
-                    size: '65%'
+                    size: '65%',
+                    labels: {
+                        show: true,
+                        name: {
+                            show: true,
+                            fontSize: '16px',
+                            fontFamily: 'Nunito, sans-serif',
+                            fontWeight: 600
+                        },
+                        value: {
+                            show: true,
+                            fontSize: '20px',
+                            fontFamily: 'Nunito, sans-serif',
+                            fontWeight: 700
+                        },
+                        total: {
+                            show: true,
+                            label: 'Total Reviews',
+                            fontSize: '14px',
+                            fontFamily: 'Nunito, sans-serif',
+                            formatter: function (w) {
+                                return w.globals.seriesTotals.reduce((a, b) => {
+                                    return a + b
+                                }, 0)
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        dataLabels: {
+            enabled: true,
+            formatter: function (val, opts) {
+                return opts.w.config.series[opts.seriesIndex] + ' (' + val.toFixed(1) + '%)'
+            },
+            style: {
+                fontSize: '12px',
+                fontFamily: 'Nunito, sans-serif'
+            }
+        },
+        tooltip: {
+            y: {
+                formatter: function (val) {
+                    return val + ' reviews'
                 }
             }
         }
