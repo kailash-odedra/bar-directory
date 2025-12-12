@@ -22,3 +22,8 @@ yarn-error.log
 /.vscode
 /.zed
 /.history
+/.cursor
+/.cursorrules
+/cursor/
+/history/
+_laravel*_skeleton
