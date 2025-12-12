@@ -17,7 +17,7 @@ use Illuminate\Support\Facades\Storage;
                     </a>
                 </div>
                 <div class="nav-item theme-text">
-                    <a href="{{getRouterValue()}}dashboard/analytics" class="nav-link"> CORK </a>
+                    <a href="{{getRouterValue()}}dashboard/analytics" class="nav-link"> Bar Directory </a>
                 </div>
             </div>
             <div class="nav-item sidebar-toggle">
@@ -148,7 +148,7 @@ use Illuminate\Support\Facades\Storage;
                             <line x1="8" y1="2" x2="8" y2="18"></line>
                             <line x1="16" y1="6" x2="16" y2="22"></line>
                         </svg>
-                        <span>Geographic / Location</span>
+                        <span>Location</span>
                     </div>
                     <div>
                         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24"

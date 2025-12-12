@@ -8,9 +8,9 @@
     <title>
         @isset($title)
             @if ($title !== '')
-                {{ $title }} | Multipurpose Bootstrap Dashboard Template
+                {{ $title }} | Bar Directory
             @else
-                CORK Admin | Multipurpose Bootstrap Dashboard Template
+                Bar Directory Admin
             @endif
         @endisset
     </title>
@@ -138,7 +138,7 @@
         (function() {
             // Always set dark mode regardless of stored preference
             const defaultTheme = {
-                admin: 'Cork Admin Template',
+                admin: 'Bar Directory',
                 settings: {
                     layout: {
                         name: 'Modern Dark Menu',
@@ -216,7 +216,7 @@
                 @include('layouts.sidebar')
             @endif
 
-            <div id="content" class="main-content {{ Request::routeIs('blank') ? 'ms-0 mt-0' : '' }}">
+            <div id="content" class="main-content {{ Request::routeIs('blank') ? 'ms-0 mt-0' : '' }}" style="padding-bottom: 70px;">
                 @isset($scrollspy)
                     @if ($scrollspy)
                         <div class="container">
@@ -346,7 +346,7 @@
 </script>
 
 
-<!-- 🔥 FINAL FIX: Prevent CORK JS from crashing -->
+<!-- Prevent theme JS from crashing -->
 <script>
 document.addEventListener("DOMContentLoaded", () => {
     
@@ -357,7 +357,7 @@ document.addEventListener("DOMContentLoaded", () => {
     if (!storedTheme) {
         // No theme stored - set dark mode as default
         themeObj = {
-            admin: 'Cork Admin Template',
+                admin: 'Bar Directory',
             settings: {
                 layout: {
                     name: 'Modern Dark Menu',
@@ -390,7 +390,7 @@ document.addEventListener("DOMContentLoaded", () => {
             console.warn("Error parsing theme:", e);
             // Reset to dark mode on error
             const defaultTheme = {
-                admin: 'Cork Admin Template',
+                admin: 'Bar Directory',
                 settings: {
                     layout: {
                         name: 'Modern Dark Menu',
@@ -438,7 +438,7 @@ document.addEventListener("DOMContentLoaded", () => {
         // Safe init
         if (typeof window.app.init === "function") {
             try { window.app.init(); }
-            catch (e) { console.warn("CORK INIT BLOCKED:", e); }
+            catch (e) { console.warn("THEME INIT BLOCKED:", e); }
         }
     }
     

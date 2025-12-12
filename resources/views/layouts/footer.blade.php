@@ -1,12 +1,9 @@
 {{-- @extends('layouts.app') --}}
 
 {{-- @section('footer') --}}
-<div class="footer-wrapper">
-    <div class="footer-section f-section-1">
-        <p class="">Copyright © <span class="dynamic-year">2025</span> <a target="_blank" href="https://designreset.com/cork-admin/">BarDirectory</a>, All rights reserved.</p>
-    </div>
-    <div class="footer-section f-section-2">
-        <p class="">Coded with <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-heart"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg></p>
+<div class="footer-wrapper" style="position: fixed; bottom: 0; left: 0; right: 0; background: var(--body-bg, #0e1726); padding: 15px 0; z-index: 1000; border-top: 1px solid rgba(255,255,255,0.1);">
+    <div class="footer-section" style="text-align: center; width: 100%;">
+        <p class="mb-0" style="color: var(--body-color, #888ea8); margin: 0;">Copyright © <span class="dynamic-year">2025</span> <a target="_blank" href="https://designreset.com/cork-admin/" style="color: var(--primary-color, #5c1ac3); text-decoration: none;">BarDirectory</a>, All rights reserved.</p>
     </div>
 </div>
 {{-- @endsection --}}

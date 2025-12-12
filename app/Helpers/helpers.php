@@ -2,24 +2,15 @@
 
 
 if (!function_exists('getRouterValue')) {
+    /**
+     * Get router value for URL generation
+     * Returns empty string for root-level deployment
+     * 
+     * @return string
+     */
     function getRouterValue() {
-
-        if (config('app.env') === 'production') {
-
-            $__getRoutingValue = '/cork/laravel/modern-dark-menu/';
-            
-        } else if (config('app.env') === 'pre_production') {
-
-            $__getRoutingValue = '/cork/laravel_cork_4/modern-dark-menu/';
-
-        } else {
-            
-            $__getRoutingValue = '/';
-
-        }        
-        
-        return $__getRoutingValue;
-
+        // Using root-level routing, no subdirectory needed
+        return '/';
     }
 }
 
