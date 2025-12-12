@@ -23,7 +23,7 @@
         </main>
         <footer class="footer">
             <div class="container">
-                <p>&copy; 2024 Bar Directory. All rights reserved.</p>
+                <p>&copy; 2025 Bar Directory. All rights reserved.</p>
             </div>
         </footer>
     </div>

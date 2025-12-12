@@ -16,19 +16,31 @@ class CheckPermission
      */
     public function handle(Request $request, Closure $next, string $permission): Response
     {
-        if (!Auth::check()) {
+        // Use admin guard for admin routes
+        if (!Auth::guard('admin')->check()) {
+            if ($request->expectsJson()) {
+                return response()->json(['message' => 'Unauthorized'], 401);
+            }
             return redirect()->route('admin.login');
         }
 
-        $user = Auth::user();
+        $user = Auth::guard('admin')->user();
 
-        // Admin users bypass permission checks
+        // Eager load roles to avoid N+1 queries
+        if (!$user->relationLoaded('roles')) {
+            $user->load('roles');
+        }
+
+        // Admin users bypass permission checks (cached check)
         if ($user->isAdmin()) {
             return $next($request);
         }
 
-        // Check if user has the required permission
+        // Check if user has the required permission (cached check)
         if (!$user->hasPermission($permission)) {
+            if ($request->expectsJson()) {
+                return response()->json(['message' => 'Forbidden. You do not have permission to access this resource.'], 403);
+            }
             abort(403, 'You do not have permission to access this resource.');
         }
 

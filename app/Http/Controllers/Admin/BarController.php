@@ -13,6 +13,7 @@ use App\Models\BarTag;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
 use Intervention\Image\Facades\Image;
 
@@ -25,13 +26,15 @@ class BarController extends Controller
         $claimed = $request->get('claimed');
         
         // Optimize: Select only needed columns and limit relationship loading
-        $bars = Bar::select('bars.id', 'bars.name', 'bars.slug', 'bars.status', 'bars.is_featured', 'bars.claimed', 'bars.created_at', 'bars.updated_at')
+        $bars = Bar::select('bars.id', 'bars.name', 'bars.slug', 'bars.status', 'bars.is_featured', 'bars.claimed', 'bars.claimed_by', 'bars.created_by', 'bars.last_updated_by', 'bars.created_at', 'bars.updated_at')
             ->with([
                 'location:id,bar_id,city,state_id,country_id',
                 'location.state:id,name',
                 'location.country:id,name',
                 'tags:id,name,slug',
-                'claimedBy:id,name'
+                'claimedBy:id,name',
+                'createdBy:id,name',
+                'lastUpdatedBy:id,name'
             ])
             ->when($status, fn($q) => $q->where('status', $status))
             ->when($featured !== null, fn($q) => $q->where('is_featured', $featured))
@@ -47,12 +50,15 @@ class BarController extends Controller
     public function pendingApproval()
     {
         // Optimize: Select only needed columns
-        $bars = Bar::select('bars.id', 'bars.name', 'bars.slug', 'bars.status', 'bars.created_at', 'bars.updated_at')
+        $bars = Bar::select('bars.id', 'bars.name', 'bars.slug', 'bars.status', 'bars.claimed_by', 'bars.created_by', 'bars.last_updated_by', 'bars.created_at', 'bars.updated_at')
             ->with([
                 'location:id,bar_id,city,state_id,country_id',
                 'location.state:id,name',
                 'location.country:id,name',
-                'tags:id,name,slug'
+                'tags:id,name,slug',
+                'claimedBy:id,name',
+                'createdBy:id,name',
+                'lastUpdatedBy:id,name'
             ])
             ->whereIn('status', [0, 2]) // Status 0 or 2 = pending approval
             ->orderBy('created_at', 'desc')
@@ -104,6 +110,9 @@ class BarController extends Controller
         $data['status'] = 1;
         $data['is_featured'] = $request->has('is_featured') ? 1 : 0;
         $data['slug'] = $data['slug'] ?: Str::slug($request->name.'-'.uniqid());
+        
+        // Set created_by to current admin user
+        $data['created_by'] = Auth::guard('admin')->id();
 
         if ($request->hasFile('logo')) {
             $data['logo'] = $this->storeImage($request->file('logo'), 'bars/logo');
@@ -181,6 +190,15 @@ class BarController extends Controller
             'facebook','instagram','tiktok','youtube','website','is_featured'
         ]);
         $data['is_featured'] = $request->has('is_featured') ? 1 : 0;
+        
+        // Update last_updated_by to current admin user
+        $data['last_updated_by'] = Auth::guard('admin')->id();
+        
+        // If created_by is not set (old bars), set it to current admin
+        // Don't update if bar is claimed by owner (owner should remain owner)
+        if (!$bar->created_by && !$bar->claimed_by) {
+            $data['created_by'] = Auth::guard('admin')->id();
+        }
 
         if ($request->hasFile('logo')) {
             if ($bar->logo) Storage::disk('public')->delete($bar->logo);

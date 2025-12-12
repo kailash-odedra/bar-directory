@@ -39,6 +39,7 @@
                                 <input type="checkbox" id="selectAll">
                             </th>
                             <th>Name</th>
+                            <th>Owner</th>
                             <th>Location</th>
                             <th>Tags</th>
                             <th>Submitted</th>
@@ -52,6 +53,7 @@
                                     <input type="checkbox" class="bar-checkbox" value="{{ $bar->id }}" data-route-key="{{ $bar->getRouteKey() }}">
                                 </td>
                                 <td>{{ $bar->name }}</td>
+                                <td>{{ $bar->owner_name }}</td>
                                 <td>
                                     @if($bar->location)
                                         {{ $bar->location->city ?? '' }}, {{ $bar->location->state->name ?? '' }}

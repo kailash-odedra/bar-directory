@@ -39,7 +39,7 @@
                         @foreach($bars as $bar)
                             <tr>
                                 <td>{{ $bar->name }}</td>
-                                <td>{{ $bar->owner ? $bar->owner->name : '-' }}</td>
+                                <td>{{ $bar->owner_name }}</td>
                                 <td>
                                     @foreach($bar->tags as $tag)
                                         <span class="badge bg-info">{{ $tag->name }}</span>

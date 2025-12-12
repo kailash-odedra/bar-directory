@@ -34,9 +34,7 @@ Route::prefix('v1')->group(function () {
     // Protected Routes (require authentication)
     Route::middleware('auth:sanctum')->group(function () {
         // User info
-        Route::get('/user', function (Request $request) {
-            return $request->user();
-        })->name('api.user');
+        Route::get('/user', [AuthController::class, 'user'])->name('api.user');
         
         // Update user profile
         Route::put('/user', [AuthController::class, 'updateProfile'])->name('api.user.update');

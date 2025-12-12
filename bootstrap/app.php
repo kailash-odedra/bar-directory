@@ -12,7 +12,13 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
-        $middleware->redirectGuestsTo(fn () => route('admin.login'));
+        // Only redirect to admin login for admin routes, not for frontend/API routes
+        $middleware->redirectGuestsTo(function ($request) {
+            if ($request->is('admin/*') || $request->is('dashboard/*')) {
+                return route('admin.login');
+            }
+            return null;
+        });
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         //

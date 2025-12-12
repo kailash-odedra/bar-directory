@@ -38,16 +38,16 @@ Route::get('/', function () {
  *          Authentication (Public)
  * =======================
  */
-Route::get('admin/login', [AuthController::class, 'showLoginForm'])->name('admin.login')->middleware('guest');
+Route::get('admin/login', [AuthController::class, 'showLoginForm'])->name('admin.login')->middleware('guest:admin');
 Route::post('admin/login', [AuthController::class, 'login'])->name('admin.login.post');
-Route::post('admin/logout', [AuthController::class, 'logout'])->name('admin.logout')->middleware('auth');
+Route::post('admin/logout', [AuthController::class, 'logout'])->name('admin.logout')->middleware('auth:admin');
 
 /**
  * =======================
  *          Dashboard (Protected)
  * =======================
  */
-Route::prefix('admin')->as('admin.')->middleware('auth')->group(function () {
+Route::prefix('admin')->as('admin.')->middleware('auth:admin')->group(function () {
     
     // Profile Routes
     Route::get('profile', [ProfileController::class, 'show'])->name('profile.show');
@@ -115,7 +115,7 @@ Route::get('claim-bar/{barId?}', [\App\Http\Controllers\Admin\ClaimController::c
 Route::post('claim-bar', [\App\Http\Controllers\Admin\ClaimController::class, 'storePublic'])->name('claims.store');
 Route::get('claim-success/{claimRequestId}', [\App\Http\Controllers\Admin\ClaimController::class, 'successPublic'])->name('claims.success');
 
-Route::prefix('dashboard')->middleware('auth')->group(function () {
+Route::prefix('dashboard')->middleware('auth:admin')->group(function () {
     Route::get('/analytics', [DashboardController::class, 'analytics'])->name('analytics');
     
     Route::get('/sales', function () {

@@ -16,31 +16,63 @@ class DashboardController extends Controller
 {
     public function analytics()
     {
-        // Calculate statistics with caching (5 minutes)
-        $totalBars = Cache::remember('dashboard.total_bars', 300, fn() => Bar::count());
-        $claimedBars = Cache::remember('dashboard.claimed_bars', 300, fn() => Bar::where('claimed', true)->count());
-        $pendingClaims = Cache::remember('dashboard.pending_claims', 60, fn() => Claim::where('verification_status', 'pending')->count());
-        $activeReviews = Cache::remember('dashboard.active_reviews', 300, fn() => BarReview::where('status', 'approved')->count());
-        $featuredBars = Cache::remember('dashboard.featured_bars', 300, fn() => Bar::where('is_featured', true)->count());
+        // Use single cache key for all dashboard stats to reduce cache calls
+        $cacheKey = 'dashboard.analytics.all';
+        $cacheTime = 300; // 5 minutes
+        
+        $stats = Cache::remember($cacheKey, $cacheTime, function() {
+            // Calculate all statistics in one go to reduce database queries
+            return [
+                'totalBars' => Bar::count(),
+                'claimedBars' => Bar::where('claimed', true)->count(),
+                'pendingClaims' => Claim::where('verification_status', 'pending')->count(),
+                'activeReviews' => BarReview::where('status', 'approved')->count(),
+                'featuredBars' => Bar::where('is_featured', true)->count(),
+                'reviewsByStatus' => BarReview::select('status', DB::raw('count(*) as count'))
+                    ->groupBy('status')
+                    ->get()
+                    ->pluck('count', 'status'),
+                'barsByStatus' => Bar::select('status', DB::raw('count(*) as count'))
+                    ->groupBy('status')
+                    ->get()
+                    ->pluck('count', 'status'),
+            ];
+        });
+        
+        // Extract cached values
+        $totalBars = $stats['totalBars'];
+        $claimedBars = $stats['claimedBars'];
+        $pendingClaims = $stats['pendingClaims'];
+        $activeReviews = $stats['activeReviews'];
+        $featuredBars = $stats['featuredBars'];
+        $reviewsByStatus = $stats['reviewsByStatus'];
+        $barsByStatus = $stats['barsByStatus'];
 
-        // Top-rated bars (4+ stars) - Cached for 10 minutes
+        // Top-rated bars (4+ stars) - Cached separately for longer (10 minutes)
         $topRatedBars = Cache::remember('dashboard.top_rated_bars', 600, function() {
-            $topRatedBarsData = DB::table('bars')
-                ->join('bar_reviews', 'bars.id', '=', 'bar_reviews.bar_id')
-                ->where('bar_reviews.status', 'approved')
-                ->select('bars.id', DB::raw('AVG(bar_reviews.rating) as avg_rating'))
-                ->groupBy('bars.id')
-                ->havingRaw('AVG(bar_reviews.rating) >= 4')
+            // Single optimized query to get top rated bars with ratings
+            $topRatedData = DB::table('bar_reviews')
+                ->where('status', 'approved')
+                ->select('bar_id', DB::raw('AVG(rating) as avg_rating'))
+                ->groupBy('bar_id')
+                ->havingRaw('AVG(rating) >= 4')
                 ->orderBy('avg_rating', 'desc')
                 ->limit(10)
-                ->get()
-                ->keyBy('id');
+                ->get();
 
-            return Bar::with(['location.state', 'location.country'])
-                ->whereIn('id', $topRatedBarsData->pluck('id'))
+            if ($topRatedData->isEmpty()) {
+                return collect([]);
+            }
+
+            $topRatedBarIds = $topRatedData->pluck('bar_id');
+            $ratingsMap = $topRatedData->keyBy('bar_id');
+
+            return Bar::select('id', 'name', 'slug', 'cover_image')
+                ->with(['location:id,bar_id,city,state_id,country_id', 'location.state:id,name', 'location.country:id,name'])
+                ->whereIn('id', $topRatedBarIds)
                 ->get()
-                ->map(function($bar) use ($topRatedBarsData) {
-                    $bar->avg_rating = $topRatedBarsData[$bar->id]->avg_rating ?? 0;
+                ->map(function($bar) use ($ratingsMap) {
+                    $bar->avg_rating = round($ratingsMap[$bar->id]->avg_rating ?? 0, 1);
                     return $bar;
                 })
                 ->sortByDesc('avg_rating')
@@ -57,28 +89,13 @@ class DashboardController extends Controller
                 ->get();
         });
 
-        // Trending tags (most used tags) - Cached for 10 minutes
+        // Trending tags (most used tags) - Cached for 10 minutes, optimize with select
         $trendingTags = Cache::remember('dashboard.trending_tags', 600, function() {
-            return BarTag::withCount('bars')
+            return BarTag::select('id', 'name', 'slug')
+                ->withCount('bars')
                 ->orderBy('bars_count', 'desc')
                 ->limit(10)
                 ->get();
-        });
-
-        // Reviews by status - Cached for 5 minutes
-        $reviewsByStatus = Cache::remember('dashboard.reviews_by_status', 300, function() {
-            return BarReview::select('status', DB::raw('count(*) as count'))
-                ->groupBy('status')
-                ->get()
-                ->pluck('count', 'status');
-        });
-
-        // Bars by status - Cached for 5 minutes
-        $barsByStatus = Cache::remember('dashboard.bars_by_status', 300, function() {
-            return Bar::select('status', DB::raw('count(*) as count'))
-                ->groupBy('status')
-                ->get()
-                ->pluck('count', 'status');
         });
 
         return view('admin.dashboard.analytics', [

@@ -3,64 +3,69 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Resources\Api\UserResource;
+use App\Http\Requests\Api\RegisterRequest;
+use App\Http\Requests\Api\LoginRequest;
+use App\Http\Requests\Api\UpdateProfileRequest;
 use App\Models\User;
+use App\Traits\ApiResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\ValidationException;
 
 class AuthController extends Controller
 {
+    use ApiResponse;
+
     /**
      * Register a new user
      */
-    public function register(Request $request)
+    public function register(RegisterRequest $request)
     {
-        $request->validate([
-            'name' => 'required|string|max:255',
-            'email' => 'required|string|email|max:255|unique:users',
-            'password' => 'required|string|min:8|confirmed',
-        ]);
+        try {
+            $user = User::create([
+                'name' => $request->name,
+                'email' => $request->email,
+                'password' => Hash::make($request->password),
+            ]);
 
-        $user = User::create([
-            'name' => $request->name,
-            'email' => $request->email,
-            'password' => Hash::make($request->password),
-        ]);
+            $token = $user->createToken('auth_token')->plainTextToken;
 
-        $token = $user->createToken('auth_token')->plainTextToken;
-
-        return response()->json([
-            'message' => 'User registered successfully',
-            'user' => $user,
-            'token' => $token,
-        ], 201);
+            return $this->successResponse([
+                'user' => new UserResource($user),
+                'token' => $token,
+                'token_type' => 'Bearer',
+            ], 'User registered successfully', 201);
+        } catch (\Exception $e) {
+            return $this->errorResponse('Registration failed: ' . $e->getMessage(), 500);
+        }
     }
 
     /**
      * Login user
      */
-    public function login(Request $request)
+    public function login(LoginRequest $request)
     {
-        $request->validate([
-            'email' => 'required|email',
-            'password' => 'required',
-        ]);
+        try {
+            $user = User::where('email', $request->email)->first();
 
-        $user = User::where('email', $request->email)->first();
+            if (!$user || !Hash::check($request->password, $user->password)) {
+                return $this->errorResponse('The provided credentials are incorrect.', 401);
+            }
 
-        if (!$user || !Hash::check($request->password, $user->password)) {
-            throw ValidationException::withMessages([
-                'email' => ['The provided credentials are incorrect.'],
-            ]);
+            // Revoke all existing tokens (optional - for single device login)
+            // $user->tokens()->delete();
+
+            $token = $user->createToken('auth_token')->plainTextToken;
+
+            return $this->successResponse([
+                'user' => new UserResource($user),
+                'token' => $token,
+                'token_type' => 'Bearer',
+            ], 'Login successful');
+        } catch (\Exception $e) {
+            return $this->errorResponse('Login failed: ' . $e->getMessage(), 500);
         }
-
-        $token = $user->createToken('auth_token')->plainTextToken;
-
-        return response()->json([
-            'message' => 'Login successful',
-            'user' => $user,
-            'token' => $token,
-        ]);
     }
 
     /**
@@ -68,33 +73,48 @@ class AuthController extends Controller
      */
     public function logout(Request $request)
     {
-        $request->user()->currentAccessToken()->delete();
+        try {
+            $request->user()->currentAccessToken()->delete();
 
-        return response()->json([
-            'message' => 'Logged out successfully',
-        ]);
+            return $this->successResponse(null, 'Logged out successfully');
+        } catch (\Exception $e) {
+            return $this->errorResponse('Logout failed: ' . $e->getMessage(), 500);
+        }
+    }
+
+    /**
+     * Get authenticated user
+     */
+    public function user(Request $request)
+    {
+        try {
+            return $this->successResponse(
+                new UserResource($request->user()),
+                'User retrieved successfully'
+            );
+        } catch (\Exception $e) {
+            return $this->errorResponse('Failed to retrieve user: ' . $e->getMessage(), 500);
+        }
     }
 
     /**
      * Update user profile
      */
-    public function updateProfile(Request $request)
+    public function updateProfile(UpdateProfileRequest $request)
     {
-        $request->validate([
-            'name' => 'required|string|max:255',
-            'email' => 'required|string|email|max:255|unique:users,email,' . $request->user()->id,
-        ]);
+        try {
+            $user = $request->user();
+            $user->update([
+                'name' => $request->name,
+                'email' => $request->email,
+            ]);
 
-        $user = $request->user();
-        $user->update([
-            'name' => $request->name,
-            'email' => $request->email,
-        ]);
-
-        return response()->json([
-            'message' => 'Profile updated successfully',
-            'user' => $user->fresh(),
-        ]);
+            return $this->successResponse(
+                new UserResource($user->fresh()),
+                'Profile updated successfully'
+            );
+        } catch (\Exception $e) {
+            return $this->errorResponse('Failed to update profile: ' . $e->getMessage(), 500);
+        }
     }
 }
-

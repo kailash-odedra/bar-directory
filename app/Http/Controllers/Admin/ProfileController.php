@@ -16,8 +16,11 @@ class ProfileController extends Controller
      */
     public function show()
     {
-        $user = Auth::user();
-        $user->load('roles');
+        $user = Auth::guard('admin')->user();
+        // Roles are already cached, but load if not already loaded
+        if (!$user->relationLoaded('roles')) {
+            $user->load('roles');
+        }
 
         return view('admin.profile.show', [
             'user' => $user,
@@ -34,7 +37,10 @@ class ProfileController extends Controller
      */
     public function update(Request $request)
     {
-        $user = Auth::user();
+        $user = Auth::guard('admin')->user();
+        
+        // Clear role cache if roles are updated (though not in this method, but good practice)
+        $user->clearRoleCache();
 
         $request->validate([
             'name' => 'required|string|max:255',

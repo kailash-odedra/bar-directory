@@ -72,6 +72,7 @@ class UserController extends Controller
 
         if ($request->has('roles')) {
             $user->roles()->sync($request->roles);
+            $user->clearRoleCache();
         }
 
         return redirect()->route('admin.users.index')->with('success', 'User created successfully.');
@@ -129,6 +130,9 @@ class UserController extends Controller
         } else {
             $user->roles()->detach();
         }
+        
+        // Clear role cache after role changes
+        $user->clearRoleCache();
 
         return redirect()->route('admin.users.index')->with('success', 'User updated successfully.');
     }
@@ -141,6 +145,7 @@ class UserController extends Controller
         }
         
         $user->roles()->detach();
+        $user->clearRoleCache();
         $user->delete();
         return back()->with('success', 'User deleted successfully.');
     }

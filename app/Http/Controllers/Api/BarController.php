@@ -3,167 +3,62 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Resources\Api\BarResource;
 use App\Models\Bar;
+use App\Traits\ApiResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 
 class BarController extends Controller
 {
+    use ApiResponse;
+
     /**
-     * Get list of bars
+     * Get list of bars with filters
      */
     public function index(Request $request)
     {
-        // Create cache key based on request parameters
-        $cacheKey = 'api.bars.list.' . md5(json_encode([
-            'search' => $request->get('search'),
-            'featured' => $request->get('featured'),
-            'page' => $request->get('page', 1),
-            'per_page' => $request->get('per_page', 12),
-        ]));
-
-        // Cache for 5 minutes
-        $response = Cache::remember($cacheKey, 300, function () use ($request) {
-            $query = Bar::with(['location.state', 'location.country', 'tags'])
-                ->withCount(['reviews as approved_reviews_count' => function ($q) {
-                    $q->where('status', 'approved');
-                }])
-                ->withAvg(['reviews as avg_rating' => function ($q) {
-                    $q->where('status', 'approved');
-                }], 'rating')
-                ->where('status', 1)
-                ->orderBy('created_at', 'desc');
-
-            // Search by name
-            if ($request->has('search')) {
-                $query->where('name', 'like', '%' . $request->search . '%');
-            }
-
-            // Filter by featured
-            if ($request->has('featured')) {
-                $query->where('is_featured', $request->featured === 'true');
-            }
-
-            // Pagination
-            $perPage = $request->get('per_page', 12);
-            $bars = $query->paginate($perPage);
-
-            // Format bars data with full image URLs and location info
-            $formattedBars = $bars->getCollection()->map(function ($bar) {
-                return $this->formatBarDataForList($bar);
+        try {
+            // Build cache key from all request parameters
+            $cacheKey = $this->buildCacheKey('api.bars.list', $request->all());
+            
+            // Cache for 5 minutes
+            $response = Cache::remember($cacheKey, 300, function () use ($request) {
+                $query = $this->buildBarQuery($request);
+                
+                // Pagination
+                $perPage = min($request->get('per_page', 12), 50); // Max 50 per page
+                $bars = $query->paginate($perPage);
+                
+                return [
+                    'data' => BarResource::collection($bars->items()),
+                    'pagination' => [
+                        'current_page' => $bars->currentPage(),
+                        'last_page' => $bars->lastPage(),
+                        'per_page' => $bars->perPage(),
+                        'total' => $bars->total(),
+                        'from' => $bars->firstItem(),
+                        'to' => $bars->lastItem(),
+                    ],
+                ];
             });
 
-            return [
-                'data' => $formattedBars->values()->all(),
-                'pagination' => [
-                    'current_page' => $bars->currentPage(),
-                    'last_page' => $bars->lastPage(),
-                    'per_page' => $bars->perPage(),
-                    'total' => $bars->total(),
-                ],
-            ];
-        });
-
-        return response()->json([
-            'success' => true,
-            'data' => $response['data'],
-            'pagination' => $response['pagination'],
-        ]);
-    }
-
-    /**
-     * Format bar data for list view (optimized - no reviews loaded)
-     */
-    private function formatBarDataForList($bar)
-    {
-        // Format cover image URL (no file system check - just generate URL)
-        $coverImageUrl = $bar->cover_image ? Storage::url($bar->cover_image) : null;
-
-        // Format location data
-        $locationData = null;
-        if ($bar->location) {
-            $location = $bar->location;
-            $locationData = [
-                'city' => $location->city ?? null,
-                'city_name' => $location->city ?? null,
-                'state_name' => $location->state->name ?? null,
-                'country_name' => $location->country->name ?? null,
-                'address' => $location->address ?? null,
-                'zipcode' => $location->zipcode ?? null,
-                'region' => $location->region ?? null,
-            ];
+            // Return response with pagination
+            return $this->successResponse(
+                $response['data'], 
+                'Bars retrieved successfully',
+                200,
+                $response['pagination']
+            )->withHeaders([
+                'X-Pagination-Current-Page' => $response['pagination']['current_page'],
+                'X-Pagination-Last-Page' => $response['pagination']['last_page'],
+                'X-Pagination-Per-Page' => $response['pagination']['per_page'],
+                'X-Pagination-Total' => $response['pagination']['total'],
+            ]);
+        } catch (\Exception $e) {
+            return $this->errorResponse('Failed to retrieve bars: ' . $e->getMessage(), 500);
         }
-
-        return [
-            'id' => $bar->id,
-            'name' => $bar->name,
-            'slug' => $bar->slug,
-            'short_description' => $bar->short_description,
-            'cover_image' => $coverImageUrl,
-            'logo' => $bar->logo ? Storage::url($bar->logo) : null,
-            'location' => $locationData,
-            'tags' => $bar->tags->map(function ($tag) {
-                return [
-                    'id' => $tag->id,
-                    'name' => $tag->name,
-                    'slug' => $tag->slug,
-                ];
-            }),
-            'avg_rating' => round($bar->avg_rating ?? 0, 1),
-            'approved_reviews_count' => $bar->approved_reviews_count ?? 0,
-            'is_featured' => $bar->is_featured,
-            'status' => $bar->status,
-            'created_at' => $bar->created_at,
-            'updated_at' => $bar->updated_at,
-        ];
-    }
-
-    /**
-     * Format bar data for detail view (with full data)
-     */
-    private function formatBarData($bar)
-    {
-        // Format cover image URL (no file system check)
-        $coverImageUrl = $bar->cover_image ? Storage::url($bar->cover_image) : null;
-
-        // Format location data
-        $locationData = null;
-        if ($bar->location) {
-            $location = $bar->location;
-            $locationData = [
-                'city' => $location->city ?? null,
-                'city_name' => $location->city ?? null,
-                'state_name' => $location->state->name ?? null,
-                'country_name' => $location->country->name ?? null,
-                'address' => $location->address ?? null,
-                'zipcode' => $location->zipcode ?? null,
-                'region' => $location->region ?? null,
-            ];
-        }
-
-        return [
-            'id' => $bar->id,
-            'name' => $bar->name,
-            'slug' => $bar->slug,
-            'short_description' => $bar->short_description,
-            'full_description' => $bar->full_description,
-            'cover_image' => $coverImageUrl,
-            'logo' => $bar->logo ? Storage::url($bar->logo) : null,
-            'location' => $locationData,
-            'tags' => $bar->tags->map(function ($tag) {
-                return [
-                    'id' => $tag->id,
-                    'name' => $tag->name,
-                    'slug' => $tag->slug,
-                ];
-            }),
-            'is_featured' => $bar->is_featured,
-            'status' => $bar->status,
-            'created_at' => $bar->created_at,
-            'updated_at' => $bar->updated_at,
-        ];
     }
 
     /**
@@ -171,57 +66,126 @@ class BarController extends Controller
      */
     public function show($id)
     {
-        $cacheKey = 'api.bars.show.' . $id;
+        try {
+            $cacheKey = "api.bars.show.{$id}";
+            
+            // Cache for 10 minutes
+            $bar = Cache::remember($cacheKey, 600, function () use ($id) {
+                return Bar::select('id', 'name', 'slug', 'short_description', 'full_description', 
+                        'cover_image', 'logo', 'is_featured', 'status', 'created_at', 'updated_at')
+                    ->with([
+                        'location:id,bar_id,city,address,zipcode,region,latitude,longitude,state_id,country_id',
+                        'location.state:id,name',
+                        'location.country:id,name',
+                        'tags:id,name,slug',
+                        'images:id,bar_id,path,type,alt',
+                        'events:id,bar_id,title,description,start_time,end_time,image,ticket_link,type'
+                    ])
+                    ->withCount(['reviews as approved_reviews_count' => function ($q) {
+                        $q->where('status', 'approved');
+                    }])
+                    ->withAvg(['reviews as avg_rating' => function ($q) {
+                        $q->where('status', 'approved');
+                    }], 'rating')
+                    ->where('status', 1)
+                    ->findOrFail($id);
+            });
+
+            return $this->successResponse(new BarResource($bar), 'Bar retrieved successfully');
+        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
+            return $this->notFoundResponse('Bar not found');
+        } catch (\Exception $e) {
+            return $this->errorResponse('Failed to retrieve bar: ' . $e->getMessage(), 500);
+        }
+    }
+
+    /**
+     * Build optimized query for bars list
+     */
+    private function buildBarQuery(Request $request)
+    {
+        $query = Bar::select('id', 'name', 'slug', 'short_description', 'cover_image', 
+                'logo', 'is_featured', 'status', 'created_at', 'updated_at')
+            ->with([
+                'location:id,bar_id,city,state_id,country_id',
+                'location.state:id,name',
+                'location.country:id,name',
+                'tags:id,name,slug'
+            ])
+            ->withCount(['reviews as approved_reviews_count' => function ($q) {
+                $q->where('status', 'approved');
+            }])
+            ->withAvg(['reviews as avg_rating' => function ($q) {
+                $q->where('status', 'approved');
+            }], 'rating')
+            ->where('status', 1);
+
+        // Search by name
+        if ($request->has('search') && $request->filled('search')) {
+            $search = $request->get('search');
+            $query->where(function($q) use ($search) {
+                $q->where('name', 'like', "%{$search}%")
+                  ->orWhere('short_description', 'like', "%{$search}%");
+            });
+        }
+
+        // Filter by featured
+        if ($request->has('featured')) {
+            $featured = filter_var($request->get('featured'), FILTER_VALIDATE_BOOLEAN);
+            $query->where('is_featured', $featured);
+        }
+
+        // Filter by city
+        if ($request->has('city') && $request->filled('city')) {
+            $query->whereHas('location', function($q) use ($request) {
+                $q->where('city', 'like', "%{$request->get('city')}%");
+            });
+        }
+
+        // Filter by state
+        if ($request->has('state_id') && $request->filled('state_id')) {
+            $query->whereHas('location', function($q) use ($request) {
+                $q->where('state_id', $request->get('state_id'));
+            });
+        }
+
+        // Filter by tags
+        if ($request->has('tags') && is_array($request->get('tags'))) {
+            $tagIds = array_filter($request->get('tags'));
+            if (!empty($tagIds)) {
+                $query->whereHas('tags', function($q) use ($tagIds) {
+                    $q->whereIn('bar_tags.id', $tagIds);
+                });
+            }
+        }
+
+        // Sorting
+        $sortBy = $request->get('sort_by', 'created_at');
+        $sortOrder = $request->get('sort_order', 'desc');
         
-        // Cache for 10 minutes
-        $formattedBar = Cache::remember($cacheKey, 600, function () use ($id) {
-            $bar = Bar::with(['location.state', 'location.country', 'tags', 'images', 'events'])
-                ->withCount(['reviews as approved_reviews_count' => function ($q) {
-                    $q->where('status', 'approved');
-                }])
-                ->withAvg(['reviews as avg_rating' => function ($q) {
-                    $q->where('status', 'approved');
-                }], 'rating')
-                ->where('status', 1)
-                ->findOrFail($id);
+        $allowedSorts = ['created_at', 'name', 'avg_rating', 'is_featured'];
+        if (in_array($sortBy, $allowedSorts)) {
+            if ($sortBy === 'avg_rating') {
+                $query->orderByRaw('(SELECT AVG(rating) FROM bar_reviews WHERE bar_reviews.bar_id = bars.id AND bar_reviews.status = "approved") ' . strtoupper($sortOrder));
+            } else {
+                $query->orderBy($sortBy, $sortOrder);
+            }
+        } else {
+            $query->orderBy('created_at', 'desc');
+        }
 
-            $formattedBar = $this->formatBarData($bar);
+        return $query;
+    }
 
-            // Use calculated values from eager loading
-            $formattedBar['average_rating'] = round($bar->avg_rating ?? 0, 1);
-            $formattedBar['total_reviews'] = $bar->approved_reviews_count ?? 0;
-
-            // Format images (no file system check)
-            $formattedBar['images'] = $bar->images->map(function ($image) {
-                return [
-                    'id' => $image->id,
-                    'path' => $image->path ? (filter_var($image->path, FILTER_VALIDATE_URL) ? $image->path : Storage::url($image->path)) : null,
-                    'type' => $image->type,
-                    'alt' => $image->alt,
-                ];
-            });
-
-            // Format events
-            $formattedBar['events'] = $bar->events->map(function ($event) {
-                return [
-                    'id' => $event->id,
-                    'title' => $event->title,
-                    'description' => $event->description,
-                    'start_time' => $event->start_time,
-                    'end_time' => $event->end_time,
-                    'image' => $event->image ? Storage::url($event->image) : null,
-                    'ticket_link' => $event->ticket_link,
-                    'type' => $event->type,
-                ];
-            });
-
-            return $formattedBar;
-        });
-
-        return response()->json([
-            'success' => true,
-            'data' => $formattedBar,
-        ]);
+    /**
+     * Build cache key from request parameters
+     */
+    private function buildCacheKey(string $prefix, array $params): string
+    {
+        // Remove null/empty values and sort for consistent keys
+        $filtered = array_filter($params, fn($value) => $value !== null && $value !== '');
+        ksort($filtered);
+        
+        return $prefix . '.' . md5(json_encode($filtered));
     }
 }
-

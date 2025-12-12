@@ -191,44 +191,7 @@ use Illuminate\Support\Facades\Storage;
             </li>
             @endcanAny
 
-            @canAny(['cms-module', 'sections-view', 'sections-create', 'sections-edit', 'sections-delete'])
-            <li class="menu {{ ($catName === 'cms') ? 'active' : '' }}">
-                <a href="#cmsMenu" data-bs-toggle="collapse"
-                aria-expanded="{{ ($catName === 'cms') ? 'true' : 'false' }}"
-                class="dropdown-toggle">
-                    <div>
-                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24"
-                            viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
-                            class="feather feather-layout">
-                            <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
-                            <line x1="3" y1="9" x2="21" y2="9"></line>
-                            <line x1="9" y1="21" x2="9" y2="9"></line>
-                        </svg>
-                        <span>CMS / Section</span>
-                    </div>
-                    <div>
-                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24"
-                            viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
-                            class="feather feather-chevron-right">
-                            <polyline points="9 18 15 12 9 6"></polyline>
-                        </svg>
-                    </div>
-                </a>
-
-                <ul class="collapse submenu list-unstyled {{ ($catName === 'cms') ? 'show' : '' }}"
-                    id="cmsMenu"
-                    data-bs-parent="#accordionExample">
-
-                    @canAny(['cms-module', 'sections-view', 'sections-create', 'sections-edit', 'sections-delete'])
-                    <li class="{{ Request::is('admin/sections*') ? 'active' : '' }}">
-                        <a href="{{ url('admin/sections') }}">All Sections</a>
-                    </li>
-                    @endcanAny
-                </ul>
-            </li>
-            @endcanAny
+            
 
             @canAny(['auth-module', 'users-view', 'users-create', 'users-edit', 'users-delete', 'roles-view', 'roles-create', 'roles-edit', 'roles-delete', 'permissions-view', 'permissions-create', 'permissions-edit', 'permissions-delete'])
             <li class="menu {{ ($catName === 'auth') ? 'active' : '' }}">
@@ -278,7 +241,44 @@ use Illuminate\Support\Facades\Storage;
                 </ul>
             </li>
             @endcanAny
+            @canAny(['cms-module', 'sections-view', 'sections-create', 'sections-edit', 'sections-delete'])
+            <li class="menu {{ ($catName === 'cms') ? 'active' : '' }}">
+                <a href="#cmsMenu" data-bs-toggle="collapse"
+                aria-expanded="{{ ($catName === 'cms') ? 'true' : 'false' }}"
+                class="dropdown-toggle">
+                    <div>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24"
+                            viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                            class="feather feather-layout">
+                            <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                            <line x1="3" y1="9" x2="21" y2="9"></line>
+                            <line x1="9" y1="21" x2="9" y2="9"></line>
+                        </svg>
+                        <span>CMS / Section</span>
+                    </div>
+                    <div>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24"
+                            viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                            class="feather feather-chevron-right">
+                            <polyline points="9 18 15 12 9 6"></polyline>
+                        </svg>
+                    </div>
+                </a>
 
+                <ul class="collapse submenu list-unstyled {{ ($catName === 'cms') ? 'show' : '' }}"
+                    id="cmsMenu"
+                    data-bs-parent="#accordionExample">
+
+                    @canAny(['cms-module', 'sections-view', 'sections-create', 'sections-edit', 'sections-delete'])
+                    <li class="{{ Request::is('admin/sections*') ? 'active' : '' }}">
+                        <a href="{{ url('admin/sections') }}">All Sections</a>
+                    </li>
+                    @endcanAny
+                </ul>
+            </li>
+            @endcanAny
 
             @canAny(['dashboard-module', 'dashboard-view', 'analytics-view', 'sales-view'])
             <li class="menu {{ ($catName === 'dashboard') ? 'active' : '' }}">
